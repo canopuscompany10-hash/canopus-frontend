@@ -54,8 +54,8 @@ function Dashboard() {
           <FaBars />
         </button>
 
-        <h1 className="text-3xl font-bold pt-10 pl-8 ">{active}</h1>
-        <main className="flex-1 p-4 md:px-8 md:py-1 overflow-y-auto">
+        <h1 className="text-3xl font-bold pt-7 pl-8 ">{active}</h1>
+        <main className="flex-1 p-4 md:px-8 md:py-1 overflow-y-auto ">
           {renderContent()}
         </main>
       </div>

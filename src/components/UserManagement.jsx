@@ -1,14 +1,8 @@
 import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
-import {
-  FaEdit,
-  FaTrash,
-  FaSearch,
-  FaUserShield,
-  FaPlus,
-} from "react-icons/fa";
+import { FaEdit, FaTrash, FaSearch, FaUserShield, FaPlus, FaUsers } from "react-icons/fa";
 import UserContext from "../context/UserContext";
-import CreateUser from "./CreateUser"; // import modal
+import CreateUser from "./CreateUser";
 
 function UserManagement() {
   const { allUsers } = useContext(UserContext);
@@ -24,6 +18,11 @@ function UserManagement() {
       u.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const totalUsers = allUsers.length;
+  const totalAdmins = allUsers.filter(u => u.role.toLowerCase() === "admin").length;
+  const totalManagers = allUsers.filter(u => u.role.toLowerCase() === "manager").length;
+  const totalStaff = allUsers.filter(u => u.role.toLowerCase() === "staff").length;
+
   const handleRoleChange = (id, role) => {
     const userIndex = allUsers.findIndex((u) => u._id === id);
     if (userIndex !== -1) {
@@ -36,41 +35,67 @@ function UserManagement() {
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to remove this user?")) {
       const filtered = allUsers.filter((u) => u._id !== id);
-      // ideally update context here, if using context method
+      // Update context if needed
       setEditUser(null);
     }
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-6 flex flex-col  gap-4 overflow-hidden ">
+      {/* Top Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4  ">
+        <div className="bg-blue-100 text-blue-800 rounded-xl p-4 flex flex-col items-center justify-center shadow">
+          <FaUsers className="text-3xl mb-2" />
+          <span className="text-lg font-bold">{totalUsers}</span>
+          <span className="text-sm">Total Users</span>
+        </div>
+        <div className="bg-red-100 text-red-800 rounded-xl p-4 flex flex-col items-center justify-center shadow">
+          <FaUserShield className="text-3xl mb-2" />
+          <span className="text-lg font-bold">{totalAdmins}</span>
+          <span className="text-sm">Admins</span>
+        </div>
+        <div className="bg-yellow-100 text-yellow-800 rounded-xl p-4 flex flex-col items-center justify-center shadow">
+          <FaUserShield className="text-3xl mb-2" />
+          <span className="text-lg font-bold">{totalManagers}</span>
+          <span className="text-sm">Managers</span>
+        </div>
+        <div className="bg-gray-100 text-gray-800 rounded-xl p-4 flex flex-col items-center justify-center shadow">
+          <FaUserShield className="text-3xl mb-2" />
+          <span className="text-lg font-bold">{totalStaff}</span>
+          <span className="text-sm">Staff</span>
+        </div>
+      </div>
+
+      {/* Header + Search + Add Button in same row */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
           <FaUserShield className="text-red-600" /> Manage Users
         </h1>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-        >
-          <FaPlus /> Add User
-        </button>
-      </div>
 
-      {/* Search Bar */}
-      <div className="flex items-center mb-4 bg-white shadow-sm p-3 rounded-xl">
-        <FaSearch className="text-gray-500 text-lg mr-3" />
-        <input
-          type="text"
-          placeholder="Search by name, email, or role..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full outline-none text-gray-700"
-        />
+        <div className="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-auto">
+          <div className="flex items-center bg-white shadow-sm p-3 rounded-xl flex-1 md:flex-none">
+            <FaSearch className="text-gray-500 text-lg mr-3" />
+            <input
+              type="text"
+              placeholder="Search by name, email, or role..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full outline-none text-gray-700"
+            />
+          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            <FaPlus /> Add User
+          </button>
+        </div>
       </div>
 
       {/* Users Table */}
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
+      <div className=" shadow rounded-xl  overflow-y-scroll flex md:h-[50vh]">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-100 text-gray-700">
+          <thead className="bg-gray-100 text-gray-700 sticky top-0">
             <tr>
               <th className="py-3 px-4 text-left">Name</th>
               <th className="py-3 px-4 text-left">Email</th>
@@ -117,11 +142,11 @@ function UserManagement() {
                   ) : (
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        u.role === "Admin"
+                        u.role === "admin"
                           ? "bg-red-100 text-red-700"
-                          : u.role === "Manager"
-                          ? "bg-blue-100 text-blue-700"
-                          : u.role === "Staff"
+                          : u.role === "manager"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : u.role === "staff"
                           ? "bg-gray-100 text-gray-700"
                           : "bg-green-100 text-green-700"
                       }`}

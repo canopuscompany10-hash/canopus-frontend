@@ -6,8 +6,7 @@ import toast from "react-hot-toast";
 import PaymentPopup from "./PaymentPopup";
 
 function WorkDetails({ work, onClose }) {
-  const { deleteWork, updateStaffPayment, updateWork } =
-    useContext(WorkContext);
+  const { deleteWork, updateStaffPayment, updateWork } = useContext(WorkContext);
   const { user } = useContext(UserContext);
 
   const [staffData, setStaffData] = useState([]);
@@ -26,6 +25,7 @@ function WorkDetails({ work, onClose }) {
       dueDate: work.dueDate,
       totalMembers: work.totalMembers || work.assignedTo?.length || 0,
       budget: work.budget || 0,
+      status: work.status || "pending", // Added status
     });
   }, [work]);
 
@@ -83,14 +83,6 @@ function WorkDetails({ work, onClose }) {
     }
   };
 
-  const progress = work.tasks?.length
-    ? Math.round(
-        (work.tasks.filter((t) => t.status === "done").length /
-          work.tasks.length) *
-          100
-      )
-    : 0;
-
   return (
     <div className="flex flex-col md:flex-row gap-6 min-h-[70vh] relative">
       {/* Close Button */}
@@ -116,9 +108,7 @@ function WorkDetails({ work, onClose }) {
               <span className="font-medium text-gray-800">{s.user.name}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">
-                ₹{s.amountPaid || 0}
-              </span>
+              <span className="text-sm text-gray-600">₹{s.amountPaid || 0}</span>
               {user?.role === "admin" && (
                 <button
                   onClick={() => setEditingStaff(s)}
@@ -147,17 +137,32 @@ function WorkDetails({ work, onClose }) {
           ) : (
             <h2 className="text-2xl font-bold">{currentWork.title}</h2>
           )}
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${
-              currentWork.status === "done"
-                ? "bg-green-100 text-green-700"
-                : currentWork.status === "in-progress"
-                ? "bg-yellow-100 text-yellow-700"
-                : "bg-gray-100 text-gray-700"
-            }`}
-          >
-            {currentWork.status || "Pending"}
-          </span>
+
+          {isEditing ? (
+            <select
+              value={editableWork.status}
+              onChange={(e) =>
+                setEditableWork({ ...editableWork, status: e.target.value })
+              }
+              className="px-3 py-1 rounded-md border text-xs font-medium"
+            >
+              <option value="pending">Pending</option>
+              <option value="in-progress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+          ) : (
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${
+                currentWork.status === "done"
+                  ? "bg-green-100 text-green-700"
+                  : currentWork.status === "in-progress"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+            >
+              {currentWork.status || "Pending"}
+            </span>
+          )}
         </div>
 
         <div className="mb-4 text-gray-700 space-y-2 text-sm">
@@ -220,6 +225,9 @@ function WorkDetails({ work, onClose }) {
                   <strong>Net Budget:</strong> ₹{currentWork.budget}
                 </p>
               )}
+              <p>
+                <strong>Status:</strong> {currentWork.status || "Pending"}
+              </p>
             </>
           )}
 
@@ -231,9 +239,6 @@ function WorkDetails({ work, onClose }) {
               <strong>Joined Members:</strong> {staffData.length}
             </p>
           </div>
-          <p>
-            <strong>Progress:</strong> {progress}%
-          </p>
         </div>
 
         {user?.role === "admin" && (
@@ -313,4 +318,3 @@ function WorkDetails({ work, onClose }) {
 }
 
 export default WorkDetails;
-// a

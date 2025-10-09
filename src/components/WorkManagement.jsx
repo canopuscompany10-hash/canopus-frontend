@@ -6,7 +6,7 @@ import AddWork from "./AddWork";
 import WorkDetails from "./WorkDetails";
 
 function WorkManagement() {
-  const { works, deleteWork, loading } = useContext(WorkContext);
+  const { works, deleteWork, updateWorkStatus, loading } = useContext(WorkContext);
   const { user } = useContext(UserContext);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,10 +20,8 @@ function WorkManagement() {
     }
   };
 
-  const getProgress = (work) => {
-    if (!work.tasks || work.tasks.length === 0) return 0;
-    const done = work.tasks.filter((t) => t.status === "done").length;
-    return Math.round((done / work.tasks.length) * 100);
+  const handleStatusChange = async (workId, newStatus) => {
+    await updateWorkStatus(workId, { status: newStatus });
   };
 
   const filteredWorks = works.filter(
@@ -36,7 +34,7 @@ function WorkManagement() {
     return <p className="text-center text-gray-500 mt-10">Loading works...</p>;
 
   return (
-    <div className="relative flex flex-col  h-[85vh] overflow-y-scroll p-4 md:overflow-hidden">
+    <div className="relative flex flex-col h-[85vh] overflow-y-scroll p-4 md:overflow-hidden">
       {/* Header */}
       {!selectedWork && (
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
@@ -65,22 +63,15 @@ function WorkManagement() {
 
       {/* Work Cards */}
       {!selectedWork && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 overflow-x-scroll">
           {filteredWorks.map((work) => {
             const isAssignedToMe = work.assignedTo?.some(
               (a) => a.user?._id === user?._id
             );
-            const progress = getProgress(work);
 
             let statusColor = "bg-gray-500";
-            let statusText = "Pending";
-            if (progress === 100) {
-              statusColor = "bg-green-500";
-              statusText = "Completed";
-            } else if (progress > 0) {
-              statusColor = "bg-yellow-500";
-              statusText = "In Progress";
-            }
+            if (work.status === "completed") statusColor = "bg-green-500";
+            else if (work.status === "in progress") statusColor = "bg-yellow-500";
 
             return (
               <div
@@ -99,19 +90,27 @@ function WorkManagement() {
                   >
                     {work.title}
                   </h3>
-                  <span
-                    className={`px-4 py-2 text-xs font-medium rounded-full text-white ${statusColor}`}
+
+                  {/* Status Dropdown */}
+                  <select
+                    value={work.status}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) =>
+                      handleStatusChange(work._id, e.target.value)
+                    }
+                    className={`px-2 py-1 text-xs font-medium rounded-full text-white ${statusColor}`}
                   >
-                    {statusText}
-                  </span>
+                    <option value="pending">Pending</option>
+                    <option value="in progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                  </select>
                 </div>
 
                 {/* Info Row */}
                 <div className="flex flex-col text-gray-500 font-medium justify-between text-xs space-y-2 pt-3">
                   <span className="flex items-center gap-2">
                     <FaUsers />
-                    <strong>Total Members Required:</strong>{" "}
-                    {work.totalMembers || 0}
+                    <strong>Total Members Required:</strong> {work.totalMembers || 0}
                   </span>
 
                   <span className="flex items-center gap-2">

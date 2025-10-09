@@ -42,10 +42,7 @@ export const WorkProvider = ({ children }) => {
   const addWork = async (workData) => {
     try {
       workData.assignedTo = normalizeAssignedTo(workData.assignedTo);
-
       if (workData.budget) workData.budget = parseFloat(workData.budget);
-
-      // Set totalMembers to provided value or default to assignedTo length
       if (!workData.totalMembers)
         workData.totalMembers = workData.assignedTo.length;
 
@@ -63,12 +60,11 @@ export const WorkProvider = ({ children }) => {
   // ✅ Update work
   const updateWork = async (workId, updatedData) => {
     try {
-      updatedData.assignedTo = normalizeAssignedTo(updatedData.assignedTo);
+      if (updatedData.assignedTo)
+        updatedData.assignedTo = normalizeAssignedTo(updatedData.assignedTo);
 
-      if (updatedData.budget)
-        updatedData.budget = parseFloat(updatedData.budget);
+      if (updatedData.budget) updatedData.budget = parseFloat(updatedData.budget);
 
-      // Ensure totalMembers is numeric
       if (updatedData.totalMembers !== undefined)
         updatedData.totalMembers = parseInt(updatedData.totalMembers);
 
@@ -84,6 +80,11 @@ export const WorkProvider = ({ children }) => {
       toast.error(err?.response?.data?.message || "Update work failed");
       setMessage("Update work failed.");
     }
+  };
+
+  // ✅ New: Update only work status
+  const updateWorkStatus = async (workId, statusData) => {
+    return updateWork(workId, statusData);
   };
 
   // ✅ Delete work
@@ -103,10 +104,7 @@ export const WorkProvider = ({ children }) => {
   // ✅ Update individual staff payment/performance
   const updateStaffPayment = async (workId, staffId, data) => {
     try {
-      if (data.amountPaid !== undefined)
-        data.amountPaid = parseFloat(data.amountPaid);
-
-      // Ensure violations is an array
+      if (data.amountPaid !== undefined) data.amountPaid = parseFloat(data.amountPaid);
       if (!Array.isArray(data.violations)) data.violations = [];
 
       const res = await AxiosInstance.patch(
@@ -116,14 +114,11 @@ export const WorkProvider = ({ children }) => {
       setWorks((prev) =>
         prev.map((w) => (w._id === workId ? res.data.work : w))
       );
-      console.log(res.data, "Updated staff payment");
       toast.success("Staff payment updated!");
       setMessage("Staff payment updated.");
     } catch (err) {
       console.error("Update Staff Payment Error:", err.response?.data || err);
-      toast.error(
-        err?.response?.data?.message || "Failed to update staff payment"
-      );
+      toast.error(err?.response?.data?.message || "Failed to update staff payment");
       setMessage("Failed to update staff payment.");
     }
   };
@@ -155,6 +150,7 @@ export const WorkProvider = ({ children }) => {
         fetchWorks,
         addWork,
         updateWork,
+        updateWorkStatus, // ✅ Added here
         deleteWork,
         updateStaffPayment,
         fetchWorkWithStatus,

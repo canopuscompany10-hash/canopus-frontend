@@ -1,12 +1,13 @@
 import React, { useState, useContext } from "react";
 import { FaBars } from "react-icons/fa";
-import AdminSidebar from "../components/AdminSidebar";
+import AdminSidebar from "../components/DashboardSidebar";
 import UserContext from "../context/UserContext";
 
 // Dashboard sections
 import UserManagement from "../components/UserManagement";
 import WorkManagement from "../components/WorkManagement";
 import DashboardHome from "../components/DashboardHome";
+import SettingsSection from "../components/SettingsSection";
 
 function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,11 +24,14 @@ function Dashboard() {
       case "Works":
         return <WorkManagement />;
 
+      case "Settings":
+        return <SettingsSection />;
+
       case "User Management":
         if (user?.role !== "admin") {
           return (
             <div className="text-center text-red-600 font-semibold mt-20">
-              ❌ Access Denied — Admins Only
+              Access Denied — Admins Only
             </div>
           );
         }
@@ -36,7 +40,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 font-sans">
+    <div className="flex max-h-[100vh] bg-gray-50 font-sans">
       {/* Sidebar */}
       <AdminSidebar
         active={active}
@@ -47,15 +51,22 @@ function Dashboard() {
 
       {/* Main Content */}
       <div className="flex-1 md:ml-64 flex flex-col">
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="md:hidden p-4 text-2xl text-gray-600"
-        >
-          <FaBars />
-        </button>
+        {/* Sticky Top Header with Mobile Menu */}
+        <div className="sticky top-0 z-20 bg-gray-50 flex items-center justify-start gap-4 p-4 md:p-6 border-b border-gray-200">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="md:hidden text-2xl text-gray-600"
+          >
+            <FaBars />
+          </button>
 
-        <h1 className="text-3xl font-bold pt-7 pl-8 ">{active}</h1>
-        <main className="flex-1 p-4 md:px-8 md:py-1 overflow-y-auto ">
+          {/* Section Title */}
+          <h1 className="text-3xl font-bold text-left pt-1 ">{active}</h1>
+        </div>
+
+        {/* Main scrollable content */}
+        <main className="flex-1 h-[40vh] p-4 md:px-8 md:py-4 overflow-hidden">
           {renderContent()}
         </main>
       </div>

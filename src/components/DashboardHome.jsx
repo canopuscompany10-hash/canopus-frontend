@@ -79,7 +79,7 @@ function DashboardHome() {
         {cardData.map((card, index) => (
           <div
             key={index}
-            className="flex flex-col items-start justify-between p-5 px-7 bg-white rounded-md shadow-sm border border-gray-100 hover:shadow-md transform hover:scale-[1.02] transition-all duration-200"
+            className="flex flex-col items-start justify-between p-5 px-7  md:w-full  w-[90%] rounded-md shadow-sm border border-gray-100 hover:shadow-md transform hover:scale-[1.02] transition-all duration-200"
           >
             <div className="flex items-center gap-4">
               <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">
@@ -93,13 +93,13 @@ function DashboardHome() {
       </div>
 
       {/* Latest Works Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 md:overflow-hidden overflow-scroll">
         <div className="p-4 border-b border-gray-100 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-800">Latest Works</h2>
           <FaCalendarAlt className="text-gray-500" />
         </div>
 
-        <table className="min-w-full text-sm">
+        <table className="min-w-full text-sm md:overflow-x-hidden overflow-x-scroll">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
               <th className="py-3 px-4 text-left">Title</th>

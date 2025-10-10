@@ -5,75 +5,90 @@ const MenuContext = createContext();
 
 export const MenuProvider = ({ children }) => {
   const [menuItems, setMenuItems] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
 
-  // Fetch all menu items on mount
-  useEffect(() => {
-    fetchMenuItems();
-  }, []);
-
-  // Fetch menu items from backend
-  const fetchMenuItems = async () => {
+  // Fetch menu items
+  const fetchMenuItems = async (pageNum = page) => {
     setLoading(true);
     try {
-      const res = await AxiosInstance.get("/menu"); // match backend route
-      setMenuItems(res.data);
+      const res = await AxiosInstance.get(`/menu?page=${pageNum}&limit=${limit}`);
+      setMenuItems(res.data.items || []);
+      setTotalPages(res.data.totalPages || 1);
       setError("");
     } catch (err) {
       setError(err.response?.data?.message || err.message);
-      console.error("Fetch menu items failed:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Add new menu item
-  const addMenuItem = async (itemData) => {
+  // Fetch categories
+  const fetchCategories = async () => {
     try {
-      await AxiosInstance.post("/menu", itemData); // match backend
-      await fetchMenuItems(); // refresh list
-      console.log("Menu item added");
+      const res = await AxiosInstance.get("/menu/categories");
+      setCategories(res.data.map((c) => c.name));
     } catch (err) {
-      console.error("Add menu item failed:", err);
-      throw err;
+      console.error(err);
     }
   };
 
-  // Update menu item
-  const updateMenuItem = async (id, updatedData) => {
-    try {
-      await AxiosInstance.put(`/menu/${id}`, updatedData);
-      await fetchMenuItems();
-      console.log("Menu item updated");
-    } catch (err) {
-      console.error("Update menu item failed:", err);
-      throw err;
-    }
+  // Menu item CRUD
+  const addMenuItem = async (data) => {
+    if (!data.image) throw new Error("Image is required");
+    await AxiosInstance.post("/menu", data);
+    await fetchMenuItems();
   };
 
-  // Delete menu item
+  const updateMenuItem = async (id, data) => {
+    if (!data.image) throw new Error("Image is required");
+    await AxiosInstance.put(`/menu/${id}`, data);
+    await fetchMenuItems();
+  };
+
   const deleteMenuItem = async (id) => {
-    try {
-      await AxiosInstance.delete(`/menu/${id}`);
-      await fetchMenuItems();
-      console.log("Menu item deleted");
-    } catch (err) {
-      console.error("Delete menu item failed:", err);
-      throw err;
-    }
+    await AxiosInstance.delete(`/menu/${id}`);
+    await fetchMenuItems();
   };
+
+  // Category CRUD
+  const createCategory = async (name) => {
+    if (!name.trim()) return;
+    await AxiosInstance.post("/menu/categories", { name });
+    setCategories((prev) => [...prev, name]);
+  };
+
+  const deleteCategory = async (name) => {
+    await AxiosInstance.delete(`/menu/categories/${name}`);
+    setCategories((prev) => prev.filter((c) => c !== name));
+  };
+
+  useEffect(() => {
+    fetchMenuItems();
+    fetchCategories();
+  }, [page]);
 
   return (
     <MenuContext.Provider
       value={{
         menuItems,
+        categories,
         loading,
         error,
+        page,
+        totalPages,
+        setPage,
         fetchMenuItems,
         addMenuItem,
         updateMenuItem,
         deleteMenuItem,
+        createCategory,
+        deleteCategory,
       }}
     >
       {children}

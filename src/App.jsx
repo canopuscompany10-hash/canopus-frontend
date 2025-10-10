@@ -1,5 +1,5 @@
 import { BrowserRouter, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { UserProvider } from "./context/UserContext";
 import { WorkProvider } from "./context/WorkContext";
 import { MenuProvider } from "./context/MenuContext";
@@ -7,8 +7,9 @@ import { GalleryProvider } from "./context/GalleryContext";
 
 import AppWrapper from "./AppWrapper";
 import Header from "./components/Header";
+import Loader from "./components/Loader";
 
-// 🧠 SEO Handler Component (Dynamic Title + Description)
+// SEO Handler
 function SEOHandler() {
   const location = useLocation();
 
@@ -17,7 +18,6 @@ function SEOHandler() {
     let description =
       "Manage catering projects, menus, and staff effortlessly with Catering Canopus.";
 
-    // Customize titles/descriptions per route
     if (location.pathname === "/") {
       title = "Home | Catering Canopus";
       description =
@@ -38,7 +38,6 @@ function SEOHandler() {
 
     document.title = title;
 
-    // Update or create meta description dynamically
     let descTag = document.querySelector('meta[name="description"]');
     if (!descTag) {
       descTag = document.createElement("meta");
@@ -53,6 +52,13 @@ function SEOHandler() {
 
 function AppContent() {
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
+
+  // Demo loader: hide after 1.5s
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Hide header on login and dashboard
   const noHeaderRoutes = ["/login", "/dashboard"];
@@ -60,15 +66,12 @@ function AppContent() {
     location.pathname.includes(route)
   );
 
+  if (loading) return <Loader />;
+
   return (
     <>
-      {/* ✅ SEO Handler */}
       <SEOHandler />
-
-      {/* ✅ Conditional Header */}
       {!hideHeader && <Header />}
-
-      {/* ✅ Main App Routes */}
       <AppWrapper />
     </>
   );

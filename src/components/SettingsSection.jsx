@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import UserContext from "../context/UserContext";
 
 function SettingsSection() {
-  const { user, updateUser, updateNotifications } = useContext(UserContext);
+  const { user, updateUser } = useContext(UserContext);
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -23,9 +23,9 @@ function SettingsSection() {
 
     try {
       const updates = { ...formData };
-      if (!updates.password) delete updates.password; // only update password if provided
+      if (!updates.password) delete updates.password;
 
-      const updatedUser = await updateUser(updates);
+      await updateUser(updates);
       setSuccess("Profile updated successfully!");
     } catch (err) {
       console.error(err);
@@ -36,7 +36,7 @@ function SettingsSection() {
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 rounded-xl shadow-md">
+    <div className="max-w-lg mx-auto bg-white p-6 rounded-xl shadow-md overflow-y-auto">
       <h2 className="text-2xl font-bold mb-4 text-red-600">Profile Settings</h2>
 
       {success && <p className="mb-4 text-green-600 font-medium">{success}</p>}

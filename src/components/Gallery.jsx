@@ -1,39 +1,76 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import GalleryContext from "../context/GalleryContext";
-import UserContext from "../context/UserContext"; // ✅ Import UserContext
+import UserContext from "../context/UserContext";
+
+const GalleryCard = memo(({ img, deleteImage, role }) => (
+  <motion.div
+    key={img._id}
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 30 }}
+    transition={{ duration: 0.5 }}
+    className="overflow-hidden rounded-xl shadow-lg relative"
+  >
+    
+    <img
+      src={img.image}
+      alt="Gallery"
+      loading="lazy"
+      className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
+    />
+    {role === "admin" && (
+      <button
+        onClick={() => {
+          if (window.confirm("Are you sure you want to delete this image?")) {
+            deleteImage(img._id);
+          }
+        }}
+        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full text-xs hover:bg-red-600"
+      >
+        Delete
+      </button>
+    )}
+  </motion.div>
+));
 
 function Gallery() {
-  const { images, loading, addImage, deleteImage } = useContext(GalleryContext);
-  const { user } = useContext(UserContext); // ✅ Get user role
-  const role = user?.role || "customer"; // default to customer
+  const { images, loading, addImage, deleteImage, fetchImages, page, totalPages } =
+    useContext(GalleryContext);
+  const { user } = useContext(UserContext);
+  const role = user?.role || "customer";
 
-  const [visibleCount, setVisibleCount] = useState(4);
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [newImage, setNewImage] = useState(null);
   const [previewImg, setPreviewImg] = useState(null);
+ const [adding, setAdding] = useState(false);
 
-  const loadMore = () =>
-    setVisibleCount((prev) => Math.min(prev + 4, images.length));
-
+  // File preview
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      setPreviewImg(ev.target.result);
-      setNewImage(ev.target.result);
-    };
+    reader.onload = (ev) => setPreviewImg(ev.target.result);
     reader.readAsDataURL(file);
+    setNewImage(file);
   };
 
-  const handleAddImage = async () => {
-    if (!newImage) return alert("Please select an image to upload!");
+
+const handleAddImage = async () => {
+  if (!newImage) return alert("Please select an image!");
+  try {
+    setAdding(true); // start loader
     await addImage(newImage);
     setNewImage(null);
     setPreviewImg(null);
     setShowAddPopup(false);
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Failed to add image");
+  } finally {
+    setAdding(false); // stop loader
+  }
+};
 
   return (
     <div id="gallery" className="py-12 bg-gray-100 relative">
@@ -50,56 +87,43 @@ function Gallery() {
       )}
 
       {/* Gallery Grid */}
-      {loading ? (
-        <p className="text-center text-gray-500">Loading images...</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 md:px-12">
-          <AnimatePresence>
-            {images.slice(0, visibleCount).map((img, index) => (
-              <motion.div
-                key={img._id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 30 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                className="overflow-hidden rounded-xl shadow-lg relative"
-              >
-                <img
-                  src={img.image}
-                  alt={`Gallery ${index + 1}`}
-                  className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 md:px-12">
+        <AnimatePresence>
+          {loading
+            ? [...Array(8)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="w-full h-60 bg-gray-300 rounded-xl animate-pulse"
                 />
-                {/* Admin Delete Button */}
-                {role === "admin" && (
-                  <button
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          "Are you sure you want to delete this image?"
-                        )
-                      ) {
-                        deleteImage(img._id);
-                      }
-                    }}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full text-xs hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                )}
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      )}
+              ))
+            : images.map((img) => (
+                <GalleryCard key={img._id} img={img} deleteImage={deleteImage} role={role} />
+              ))}
+        </AnimatePresence>
+      </div>
 
-      {/* Load More Button */}
-      {visibleCount < images.length && (
-        <div className="flex justify-center mt-8">
+      {/* Pagination Controls */}
+      {!loading && totalPages > 1 && (
+        <div className="flex justify-center items-center mt-8 gap-3">
           <button
-            onClick={loadMore}
-            className="bg-red-500 text-white px-6 py-2 rounded-xl hover:bg-red-600 transition"
+            disabled={page === 1}
+            onClick={() => fetchImages(page - 1)}
+            className="px-4 py-2 bg-gray-300 rounded-xl disabled:opacity-50 hover:bg-gray-400 transition"
           >
-            Load More
+            Prev
+          </button>
+          <span className="text-lg font-semibold">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => fetchImages(page + 1)}
+            className="px-4 py-2 bg-red-500 text-white rounded-xl disabled:opacity-50 hover:bg-red-600 transition"
+          >
+            Next
           </button>
         </div>
       )}
@@ -119,9 +143,7 @@ function Gallery() {
               exit={{ scale: 0.8, opacity: 0 }}
               className="bg-white rounded-2xl p-6 w-96 shadow-2xl relative"
             >
-              <h3 className="text-2xl font-bold mb-5 text-center">
-                Add New Image
-              </h3>
+              <h3 className="text-2xl font-bold mb-5 text-center">Add New Image</h3>
 
               <input
                 type="file"
@@ -149,12 +171,16 @@ function Gallery() {
                 >
                   Cancel
                 </button>
-                <button
-                  onClick={handleAddImage}
-                  className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"
-                >
-                  Add
-                </button>
+               <button
+  onClick={handleAddImage}
+  disabled={adding}
+  className={`px-4 py-2 rounded text-white ${
+    adding ? "bg-gray-400 cursor-not-allowed" : "bg-red-500 hover:bg-red-600"
+  } transition`}
+>
+  {adding ? "Adding..." : "Add"}
+</button>
+
               </div>
             </motion.div>
           </motion.div>

@@ -40,7 +40,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="flex max-h-[100vh] bg-gray-50 font-sans">
+    <div className="flex h-screen bg-gray-50 font-sans overflow-hidden">
       {/* Sidebar */}
       <AdminSidebar
         active={active}
@@ -50,7 +50,7 @@ function Dashboard() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 md:ml-64 flex flex-col">
+      <div className="flex-1 flex flex-col md:ml-64">
         {/* Sticky Top Header with Mobile Menu */}
         <div className="sticky top-0 z-20 bg-gray-50 flex items-center justify-start gap-4 p-4 md:p-6 border-b border-gray-200">
           {/* Mobile Menu Button */}
@@ -62,11 +62,11 @@ function Dashboard() {
           </button>
 
           {/* Section Title */}
-          <h1 className="text-3xl font-bold text-left pt-1 ">{active}</h1>
+          <h1 className="text-3xl font-bold text-left pt-1">{active}</h1>
         </div>
 
         {/* Main scrollable content */}
-        <main className="flex-1 h-[40vh] p-4 md:px-8 md:py-4 overflow-hidden">
+        <main className="flex-1 p-4 md:px-8 md:py-4 overflow-y-auto">
           {renderContent()}
         </main>
       </div>

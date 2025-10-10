@@ -1,4 +1,3 @@
-// context/GalleryContext.jsx
 import { createContext, useState, useEffect } from "react";
 import AxiosInstance from "../lib/axios";
 
@@ -8,13 +7,20 @@ export const GalleryProvider = ({ children }) => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch gallery images
-  const fetchImages = async () => {
+  const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+  // Fetch gallery images with pagination
+  const fetchImages = async (pageNumber = 1) => {
     setLoading(true);
     try {
-      const res = await AxiosInstance.get("/gallery");
-      setImages(res.data);
+      const res = await AxiosInstance.get(`/gallery?page=${pageNumber}&limit=8`);
+      setImages(res.data.images || []);
+      setTotalPages(res.data.totalPages || 1);
+      setPage(pageNumber);
       setError("");
     } catch (err) {
       setError(err.response?.data?.message || err.message);
@@ -24,22 +30,46 @@ export const GalleryProvider = ({ children }) => {
     }
   };
 
-  // Add new gallery image
-  const addImage = async (imageURL) => {
+  // Upload image to Cloudinary
+  const uploadToCloudinary = async (file) => {
+    if (!file) throw new Error("No file selected");
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
+    formData.append("folder", "gallery");
+
     try {
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        { method: "POST", body: formData }
+      );
+      const data = await res.json();
+      if (!data.secure_url) throw new Error(data.error?.message || "Upload failed");
+      return data.secure_url;
+    } catch (err) {
+      console.error("Cloudinary upload error:", err);
+      throw err;
+    }
+  };
+
+  // Add new image
+  const addImage = async (file) => {
+    try {
+      const imageURL = await uploadToCloudinary(file);
       await AxiosInstance.post("/gallery", { image: imageURL });
-      fetchImages(); // refresh
+      fetchImages(1);
     } catch (err) {
       console.error("Add gallery image failed:", err);
       throw err;
     }
   };
 
-  // Delete gallery image
+  // Delete image
   const deleteImage = async (id) => {
     try {
       await AxiosInstance.delete(`/gallery/${id}`);
-      fetchImages();
+      fetchImages(page);
     } catch (err) {
       console.error("Delete gallery image failed:", err);
       throw err;
@@ -47,7 +77,7 @@ export const GalleryProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchImages();
+    fetchImages(1);
   }, []);
 
   return (
@@ -56,6 +86,8 @@ export const GalleryProvider = ({ children }) => {
         images,
         loading,
         error,
+        page,
+        totalPages,
         fetchImages,
         addImage,
         deleteImage,

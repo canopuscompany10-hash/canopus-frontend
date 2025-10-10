@@ -11,15 +11,13 @@ import WorkContext from "../context/WorkContext";
 
 function DashboardHome() {
   const { allUsers = [], loading: usersLoading } = useContext(UserContext);
-  const { works = [], loading: worksLoading } = useContext(WorkContext); // ✅ corrected
+  const { works = [], loading: worksLoading } = useContext(WorkContext);
 
-  // Calculate staff users (for admin summary)
   const staffUsers = useMemo(
     () => allUsers.filter((u) => u.role.toLowerCase() === "staff"),
     [allUsers]
   );
 
-  // Compute work summary
   const { totalWorks, completedWorks, pendingWorks } = useMemo(() => {
     const completed = works.filter(
       (w) =>
@@ -33,7 +31,6 @@ function DashboardHome() {
     };
   }, [works]);
 
-  // Sort works by latest
   const latestWorks = useMemo(
     () =>
       [...works]

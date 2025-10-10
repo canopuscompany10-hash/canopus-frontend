@@ -1,15 +1,10 @@
 import React from "react";
-import {
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaLinkedinIn,
-} from "react-icons/fa";
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 
 function Footer() {
   return (
     <footer id="contact" className="bg-red-600 text-white py-12">
-      <div className="max-w-7xl mx-auto px-6 md:px-16 flex flex-col md:flex-row justify-between items-center md:items-start gap-10 md:gap-0">
+      <div className="max-w-7xl mx-auto px-6 md:px-16 flex flex-col md:flex-row justify-between items-start gap-10">
         {/* Branding */}
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-3xl font-bold kaushan-script-regular">
@@ -20,8 +15,9 @@ function Footer() {
           </p>
         </div>
 
-        {/* Navigation Links */}
+        {/* Quick Links & Services */}
         <div className="flex flex-col md:flex-row gap-8 md:gap-16 text-center md:text-left flex-1">
+          {/* Quick Links */}
           <div>
             <h3 className="font-semibold mb-3">Quick Links</h3>
             <ul className="space-y-2">
@@ -36,15 +32,16 @@ function Footer() {
             </ul>
           </div>
 
+          {/* Our Services */}
           <div>
-            <h3 className="font-semibold mb-3">Support</h3>
+            <h3 className="font-semibold mb-3">Our Services</h3>
             <ul className="space-y-2">
-              {["FAQ", "Privacy Policy", "Terms of Service"].map((link) => (
+              {["Weddings", "Corporate Events", "Birthday Parties"].map((service) => (
                 <li
-                  key={link}
+                  key={service}
                   className="hover:text-yellow-400 cursor-pointer transition-colors text-sm md:text-base"
                 >
-                  {link}
+                  {service}
                 </li>
               ))}
             </ul>
@@ -52,18 +49,16 @@ function Footer() {
         </div>
 
         {/* Social Icons */}
-        <div className="flex gap-4 mt-6 md:mt-0 flex-wrap justify-center md:justify-start">
-          {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn].map(
-            (Icon, index) => (
-              <a
-                key={index}
-                href="#"
-                className="p-3 bg-white text-red-600 rounded-full hover:bg-yellow-400 hover:text-white transition-all transform hover:scale-110"
-              >
-                <Icon />
-              </a>
-            )
-          )}
+        <div className="flex gap-4 mt-6 md:mt-0 justify-center md:justify-start">
+          {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn].map((Icon, index) => (
+            <a
+              key={index}
+              href="#"
+              className="p-3 bg-white text-red-600 rounded-full hover:bg-yellow-400 hover:text-white transition-all transform hover:scale-110"
+            >
+              <Icon />
+            </a>
+          ))}
         </div>
       </div>
 

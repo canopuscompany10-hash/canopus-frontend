@@ -1,3 +1,5 @@
+
+
 import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { FaEdit, FaTrash, FaSearch, FaUserShield, FaPlus, FaUsers } from "react-icons/fa";
@@ -19,9 +21,9 @@ function UserManagement() {
   );
 
   const totalUsers = allUsers.length;
-  const totalAdmins = allUsers.filter(u => u.role.toLowerCase() === "admin").length;
-  const totalManagers = allUsers.filter(u => u.role.toLowerCase() === "manager").length;
-  const totalStaff = allUsers.filter(u => u.role.toLowerCase() === "staff").length;
+  const totalAdmins = allUsers.filter((u) => u.role.toLowerCase() === "admin").length;
+  const totalManagers = allUsers.filter((u) => u.role.toLowerCase() === "manager").length;
+  const totalStaff = allUsers.filter((u) => u.role.toLowerCase() === "staff").length;
 
   const handleRoleChange = (id, role) => {
     const userIndex = allUsers.findIndex((u) => u._id === id);
@@ -35,39 +37,34 @@ function UserManagement() {
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to remove this user?")) {
       const filtered = allUsers.filter((u) => u._id !== id);
-      // Update context if needed
       setEditUser(null);
     }
   };
 
   return (
-    <div className="p-6 flex flex-col  gap-4 overflow-hidden ">
+    <div className="flex flex-col gap-4  max-w-full mx-auto">
+
       {/* Top Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4  ">
-        <div className="bg-blue-100 text-blue-800 rounded-xl p-4 flex flex-col items-center justify-center shadow">
-          <FaUsers className="text-3xl mb-2" />
-          <span className="text-lg font-bold">{totalUsers}</span>
-          <span className="text-sm">Total Users</span>
-        </div>
-        <div className="bg-red-100 text-red-800 rounded-xl p-4 flex flex-col items-center justify-center shadow">
-          <FaUserShield className="text-3xl mb-2" />
-          <span className="text-lg font-bold">{totalAdmins}</span>
-          <span className="text-sm">Admins</span>
-        </div>
-        <div className="bg-yellow-100 text-yellow-800 rounded-xl p-4 flex flex-col items-center justify-center shadow">
-          <FaUserShield className="text-3xl mb-2" />
-          <span className="text-lg font-bold">{totalManagers}</span>
-          <span className="text-sm">Managers</span>
-        </div>
-        <div className="bg-gray-100 text-gray-800 rounded-xl p-4 flex flex-col items-center justify-center shadow">
-          <FaUserShield className="text-3xl mb-2" />
-          <span className="text-lg font-bold">{totalStaff}</span>
-          <span className="text-sm">Staff</span>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { title: "Total Users", count: totalUsers, icon: <FaUsers className="text-3xl text-blue-500" />, bg: "bg-blue-100 text-blue-800" },
+          { title: "Admins", count: totalAdmins, icon: <FaUserShield className="text-3xl text-red-500" />, bg: "bg-red-100 text-red-800" },
+          { title: "Managers", count: totalManagers, icon: <FaUserShield className="text-3xl text-yellow-500" />, bg: "bg-yellow-100 text-yellow-800" },
+          { title: "Staff", count: totalStaff, icon: <FaUserShield className="text-3xl text-gray-500" />, bg: "bg-gray-100 text-gray-800" },
+        ].map((card, i) => (
+          <div
+            key={i}
+            className={`${card.bg} rounded-xl p-4 flex flex-col items-center justify-center shadow w-full`}
+          >
+            {card.icon}
+            <span className="text-lg font-bold mt-2">{card.count}</span>
+            <span className="text-sm">{card.title}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Header + Search + Add Button in same row */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      {/* Header + Search + Add Button */}
+   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
           <FaUserShield className="text-red-600" /> Manage Users
         </h1>
@@ -92,10 +89,12 @@ function UserManagement() {
         </div>
       </div>
 
+
+
       {/* Users Table */}
-      <div className=" shadow rounded-xl  overflow-y-scroll flex md:h-[50vh]">
+      <div className="overflow-x-auto shadow rounded-xl w-full">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-100 text-gray-700 sticky top-0">
+          <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
             <tr>
               <th className="py-3 px-4 text-left">Name</th>
               <th className="py-3 px-4 text-left">Email</th>
@@ -112,26 +111,24 @@ function UserManagement() {
                 transition={{ delay: i * 0.05 }}
                 className="border-t hover:bg-gray-50"
               >
-                <td className="py-3 px-4 flex items-center gap-2">
+                <td className="py-3 px-4 flex items-center gap-2 whitespace-nowrap">
                   <img
                     src={
                       u.image ||
-                      `https://randomuser.me/api/portraits/${
-                        i % 2 === 0 ? "men" : "women"
-                      }/${i + 30}.jpg`
+                      `https://randomuser.me/api/portraits/${i % 2 === 0 ? "men" : "women"}/${i + 30}.jpg`
                     }
                     alt={u.name}
                     className="w-8 h-8 rounded-full border"
                   />
                   {u.name}
                 </td>
-                <td className="py-3 px-4">{u.email}</td>
-                <td className="py-3 px-4">
+                <td className="py-3 px-4 whitespace-nowrap">{u.email}</td>
+                <td className="py-3 px-4 whitespace-nowrap">
                   {editUser === u._id ? (
                     <select
                       value={newRole}
                       onChange={(e) => setNewRole(e.target.value)}
-                      className="border rounded-lg p-1 text-sm"
+                      className="border rounded-lg p-1 text-sm w-full"
                     >
                       <option value="">Select role</option>
                       <option value="admin">Admin</option>
@@ -155,7 +152,7 @@ function UserManagement() {
                     </span>
                   )}
                 </td>
-                <td className="py-3 px-4 text-center">
+                <td className="py-3 px-4 text-center whitespace-nowrap flex justify-center gap-2 flex-wrap">
                   {editUser === u._id ? (
                     <button
                       onClick={() => handleRoleChange(u._id, newRole)}
@@ -170,7 +167,7 @@ function UserManagement() {
                           setEditUser(u._id);
                           setNewRole(u.role);
                         }}
-                        className="text-blue-500 hover:text-blue-700 mr-3"
+                        className="text-blue-500 hover:text-blue-700"
                       >
                         <FaEdit />
                       </button>
@@ -190,9 +187,7 @@ function UserManagement() {
       </div>
 
       {/* Create User Modal */}
-      {showCreateModal && (
-        <CreateUser onClose={() => setShowCreateModal(false)} />
-      )}
+      {showCreateModal && <CreateUser onClose={() => setShowCreateModal(false)} />}
     </div>
   );
 }

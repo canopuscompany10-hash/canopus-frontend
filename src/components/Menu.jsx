@@ -1,253 +1,239 @@
-import React, { useState, useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaTrash } from "react-icons/fa";
 import MenuContext from "../context/MenuContext";
 import UserContext from "../context/UserContext";
 import MenuPopup from "./MenuPopup";
 
 function Menu() {
-  const { menuItems, addMenuItem, loading } = useContext(MenuContext);
+  const {
+    menuItems,
+    loading,
+    page,
+    totalPages,
+    setPage,
+    fetchMenuItems,
+    categories,
+    createCategory,
+    deleteCategory,
+    deleteMenuItem,
+  } = useContext(MenuContext);
+
   const { user } = useContext(UserContext);
   const role = user?.role || "customer";
 
-  const [activeCategory, setActiveCategory] = useState("Starter");
-  const [currentPage, setCurrentPage] = useState(1);
+  // Default active category is "All"
+  const [activeCategory, setActiveCategory] = useState("All");
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showMenuPopup, setShowMenuPopup] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
 
-  const [newItem, setNewItem] = useState({
-    name: "",
-    description: "",
-    price: "",
-    category: activeCategory,
-    image: "",
-  });
-  const [previewImg, setPreviewImg] = useState(null);
+  // Fetch menu items on page change
+  useEffect(() => {
+    fetchMenuItems(page);
+  }, [page]);
 
-  const itemsPerPage = 4;
-  const currentCategoryItems = menuItems.filter((item) => item.category === activeCategory);
-  const totalPages = Math.ceil(currentCategoryItems.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentItems = currentCategoryItems.slice(startIndex, startIndex + itemsPerPage);
-
-  const handlePrev = () => currentPage > 1 && setCurrentPage(currentPage - 1);
-  const handleNext = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
-  const handleCategoryChange = (cat) => {
-    setActiveCategory(cat);
-    setCurrentPage(1);
-  };
-
-  /*** Move these into popup form ***/
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setPreviewImg(ev.target.result);
-      setNewItem({ ...newItem, image: ev.target.result });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleAddItem = async () => {
-    if (!newItem.name || !newItem.price || !newItem.image) {
-      return alert("Please fill all fields and upload an image!");
+  // Ensure default category exists
+  useEffect(() => {
+    if (!categories.includes("All")) {
+      setActiveCategory(categories[0] || "All");
+    } else {
+      setActiveCategory("All");
     }
+  }, [categories]);
+
+  // Filter items: "All" shows everything
+  const filteredItems =
+    activeCategory === "All"
+      ? menuItems
+      : menuItems.filter((item) => item.category === activeCategory);
+
+  const handlePrev = () => page > 1 && setPage(page - 1);
+  const handleNext = () => page < totalPages && setPage(page + 1);
+
+  const handleAddCategory = async () => {
+    if (!newCategory.trim()) return alert("Please enter a category name!");
     try {
-      await addMenuItem(newItem);
-      setNewItem({ name: "", description: "", price: "", category: activeCategory, image: "" });
-      setPreviewImg(null);
-      setShowAddPopup(false);
+      await createCategory(newCategory);
+      setActiveCategory(newCategory);
+      setNewCategory("");
     } catch (err) {
-      console.error("Failed to add menu item:", err);
+      console.error("Failed to create category:", err);
+      alert("Failed to add category");
     }
   };
-  /*** End ***/
+
+  const handleDeleteCategory = async (cat) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete the category "${cat}"? This will also delete all items in it.`
+      )
+    ) {
+      try {
+        // Delete the category
+        await deleteCategory(cat);
+
+        // Delete all menu items in that category
+        const itemsInCategory = menuItems.filter((item) => item.category === cat);
+        for (let item of itemsInCategory) {
+          await deleteMenuItem(item._id);
+        }
+
+        // Reset active category if it was deleted
+        if (activeCategory === cat) setActiveCategory("All");
+      } catch (err) {
+        console.error("Failed to delete category or items:", err);
+        alert("Failed to delete category or its items");
+      }
+    }
+  };
 
   return (
-    <div id="menu" className="min-h-screen py-16 px-6 md:px-20 bg-red-500 text-white relative overflow-hidden">
-      <div className="flex justify-between items-center mb-10 relative">
-        <h2 className="kaushan-script-regular text-4xl md:text-5xl text-center w-full">
+    <div className="min-h-screen py-16 px-6 md:px-20 bg-red-500 text-white relative overflow-hidden">
+      {/* Header */}
+      <div className="relative mb-10">
+        <h2 className="kaushan-script-regular text-4xl md:text-5xl text-center">
           Catering Menu
         </h2>
-
-        {/* Admin Add Button */}
-        {role === "admin" && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowAddPopup(true)}
-            className="bg-white text-red-500 font-semibold px-4 py-2 rounded-full shadow-md hover:bg-white/90 absolute right-6 top-16 md:right-20"
-          >
-            + Add Item
-          </motion.button>
-        )}
-
-        {/* Customer Select Items Button */}
-        {role !== "admin" && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowMenuPopup(true)}
-            className="bg-white text-red-500 font-semibold px-4 py-2 rounded-full shadow-md hover:bg-white/90 absolute right-6 top-16 md:right-20"
-          >
-            Select Items
-          </motion.button>
-        )}
+        <div className="absolute top-0 right-0">
+          {role === "admin" ? (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowAddPopup(true)}
+              className="bg-white text-red-500 font-semibold px-4 py-2 rounded-full shadow-md"
+            >
+              + Add Item
+            </motion.button>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowMenuPopup(true)}
+              className="bg-white text-red-500 font-semibold px-4 py-2 rounded-full shadow-md"
+            >
+              Select Items
+            </motion.button>
+          )}
+        </div>
       </div>
 
-      {/* Category Buttons */}
-      <div className="flex flex-wrap justify-center gap-4 mb-12">
-        {["Starter", "Main Course", "Drinks", "Offers", "Our Special"].map((cat) => (
-          <motion.button
-            key={cat}
-            onClick={() => handleCategoryChange(cat)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-6 py-2 rounded-full font-semibold border-2 transition-all duration-200 ${
-              activeCategory === cat
-                ? "bg-white text-red-500 border-white"
-                : "border-white text-white hover:bg-white hover:text-red-500"
-            }`}
-          >
-            {cat}
-          </motion.button>
+      {/* Categories */}
+      <div className="flex flex-wrap justify-center gap-4 mb-12 items-center">
+        {["All", ...categories.filter((cat) => cat !== "All")].map((cat) => (
+          <div key={cat} className="relative flex items-center">
+            <button
+              onClick={() => setActiveCategory(cat)}
+              className={`px-6 py-2 rounded-full font-semibold border-2 transition-all duration-200 ${
+                activeCategory === cat
+                  ? "bg-white text-red-500 border-white"
+                  : "border-white text-white hover:bg-white hover:text-red-500"
+              }`}
+            >
+              {cat}
+            </button>
+            {role === "admin" && !["All"].includes(cat) && (
+              <button
+                onClick={() => handleDeleteCategory(cat)}
+                className="absolute -top-2 -right-2 bg-black text-white rounded-full w-5 h-5 flex justify-center items-center text-xs hover:bg-gray-800 transition"
+              >
+                <FaTrash />
+              </button>
+            )}
+          </div>
         ))}
+        {role === "admin" && (
+          <div className="ml-4 flex gap-2 items-center">
+            <input
+              type="text"
+              placeholder="New category"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              className="border p-2 rounded text-black"
+            />
+            <button
+              onClick={handleAddCategory}
+              className="bg-white text-red-500 px-4 py-2 rounded hover:bg-gray-100 transition"
+            >
+              Add
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Menu Items */}
       {loading ? (
         <p className="text-center text-white">Loading menu items...</p>
-      ) : currentItems.length > 0 ? (
-        <motion.div
-          key={activeCategory + currentPage}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto"
-        >
-          {currentItems.map((item) => (
-            <motion.div
+      ) : filteredItems.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          {filteredItems.map((item) => (
+            <div
               key={item._id}
               className="flex items-center justify-between gap-4 p-4 border-b border-dotted border-white transition-all"
-              whileHover={{ scale: 1.02 }}
             >
               <div className="flex items-center gap-4">
-                <img src={item.image} alt={item.name} className="w-16 h-16 rounded-full object-cover" />
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-16 h-16 rounded-full object-cover"
+                />
                 <div>
                   <h3 className="text-lg font-semibold">{item.name}</h3>
                   <p className="text-white/90 text-sm">{item.description}</p>
                 </div>
               </div>
-              <span className="text-white font-bold">{item.price}</span>
-            </motion.div>
+              <span className="text-white font-bold">${item.price}</span>
+            </div>
           ))}
-        </motion.div>
-      ) : (
-        <div className="col-span-2 text-center py-16 text-white/80 text-lg italic">
-          No items listed yet in <span className="font-semibold">{activeCategory}</span>.
-          {role === "admin" && (
-            <p className="mt-2 text-sm text-white/70">
-              Click <span className="font-semibold">“+ Add Item”</span> to add one.
-            </p>
-          )}
         </div>
+      ) : (
+        <p className="text-center text-white/80 text-lg italic">
+          No items listed in <span className="font-semibold">{activeCategory}</span>.
+        </p>
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-6 gap-3">
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="px-4 py-2 rounded bg-white text-red-500 disabled:opacity-50 hover:bg-white/80 transition-colors"
-          >
-            Prev
-          </button>
-          <span className="px-3 py-2">
-            {currentPage} / {totalPages}
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 rounded bg-white text-red-500 disabled:opacity-50 hover:bg-white/80 transition-colors"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <div className="flex justify-center items-center gap-4 mt-8">
+        <button
+          onClick={handlePrev}
+          disabled={page === 1}
+          className="bg-white text-red-500 px-4 py-2 rounded-full disabled:opacity-50 hover:bg-white/90 transition"
+        >
+          Prev
+        </button>
+        <span className="text-white font-semibold">
+          Page {page} of {totalPages}
+        </span>
+        <button
+          onClick={handleNext}
+          disabled={page === totalPages}
+          className="bg-white text-red-500 px-4 py-2 rounded-full disabled:opacity-50 hover:bg-white/90 transition"
+        >
+          Next
+        </button>
+      </div>
 
       {/* Add Item Popup */}
       <AnimatePresence>
         {showAddPopup && role === "admin" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4 overflow-auto"
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-white text-red-500 rounded-2xl p-6 w-full max-w-md shadow-2xl relative"
-            >
-              <h2 className="text-2xl font-bold mb-4 text-center text-red-500">Add Menu Item</h2>
+          <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4 overflow-auto">
+            <div className="bg-white text-red-500 rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+              <h2 className="text-2xl font-bold mb-4 text-center text-red-500">
+                Add Menu Item
+              </h2>
               <button
                 onClick={() => setShowAddPopup(false)}
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl"
               >
                 ✕
               </button>
-
-              <div className="flex flex-col gap-3">
-                <input
-                  type="text"
-                  placeholder="Name"
-                  value={newItem.name}
-                  onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                  className="border p-2 rounded"
-                />
-                <input
-                  type="text"
-                  placeholder="Description"
-                  value={newItem.description}
-                  onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                  className="border p-2 rounded"
-                />
-                <input
-                  type="number"
-                  placeholder="Price"
-                  value={newItem.price}
-                  onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-                  className="border p-2 rounded"
-                />
-                <select
-                  value={newItem.category}
-                  onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
-                  className="border p-2 rounded"
-                >
-                  {["Starter", "Main Course", "Drinks", "Offers", "Our Special"].map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="border p-2 rounded" />
-                {previewImg && <img src={previewImg} alt="preview" className="w-32 h-32 object-cover rounded" />}
-
-                <button
-                  onClick={handleAddItem}
-                  className="bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition"
-                >
-                  Add Item
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+              <MenuPopup onClose={() => setShowAddPopup(false)} />
+            </div>
+          </div>
         )}
       </AnimatePresence>
 
-      {/* Customer MenuPopup */}
+      {/* Customer popup */}
       <AnimatePresence>
         {showMenuPopup && <MenuPopup onClose={() => setShowMenuPopup(false)} />}
       </AnimatePresence>

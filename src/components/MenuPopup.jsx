@@ -1,89 +1,144 @@
-import React, { useContext, useState, useEffect } from "react";
-import { FaTimes } from "react-icons/fa";
+import React, { useState, useContext } from "react";
 import MenuContext from "../context/MenuContext";
 
-function MenuPopup({ onClose }) {
-  const { menuItems, loading, error } = useContext(MenuContext);
+function MenuPopup({ onClose, itemToEdit }) {
+  const { addMenuItem, updateMenuItem, categories } = useContext(MenuContext);
 
-  const [categories, setCategories] = useState([]);
-  const [activeCategory, setActiveCategory] = useState("All");
+  const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
-  useEffect(() => {
-    if (menuItems && menuItems.length > 0) {
-      const uniqueCategories = [
-        "All",
-        ...new Set(menuItems.map((item) => item.category)),
-      ];
-      setCategories(uniqueCategories);
+  const [formData, setFormData] = useState({
+    name: itemToEdit?.name || "",
+    description: itemToEdit?.description || "",
+    price: itemToEdit?.price || "",
+    // Default category to "All" if none selected
+    category: itemToEdit?.category || "All",
+    image: itemToEdit?.image || "",
+  });
+
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  // Upload image to Cloudinary
+  const handleFileChange = async (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return alert("No file selected!");
+    setUploading(true);
+
+    try {
+      const formDataCloud = new FormData();
+      formDataCloud.append("file", selectedFile);
+      formDataCloud.append("upload_preset", UPLOAD_PRESET);
+      formDataCloud.append("folder", "canopus_gallery_images");
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        { method: "POST", body: formDataCloud }
+      );
+
+      if (!res.ok) throw new Error("Network error during Cloudinary upload");
+
+      const data = await res.json();
+      setFormData((prev) => ({ ...prev, image: data.secure_url }));
+      setFile(selectedFile);
+      alert("✅ Image uploaded successfully!");
+    } catch (err) {
+      console.error("Cloudinary upload error:", err);
+      alert("❌ Image upload failed. Check console.");
+    } finally {
+      setUploading(false);
     }
-  }, [menuItems]);
+  };
 
-  const filteredItems =
-    activeCategory === "All"
-      ? menuItems
-      : menuItems.filter((item) => item.category === activeCategory);
+  // Submit menu item
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.image) return alert("Please upload an image first!");
+    if (!formData.name || !formData.price) return alert("Fill required fields");
+
+    setUploading(true);
+    try {
+      if (itemToEdit) {
+        await updateMenuItem(itemToEdit._id, formData);
+      } else {
+        await addMenuItem(formData);
+      }
+      onClose();
+    } catch (err) {
+      console.error("Submit failed:", err);
+      alert("Failed to save menu item.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex justify-center items-start md:items-center z-50 p-4 overflow-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative p-6 md:p-10">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl transition"
+    <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="text"
+          placeholder="Name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          required
+          className="border p-2 rounded w-full"
+        />
+        <textarea
+          placeholder="Description"
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+          className="border p-2 rounded w-full"
+        />
+        <input
+          type="number"
+          placeholder="Price"
+          value={formData.price}
+          onChange={(e) =>
+            setFormData({ ...formData, price: parseFloat(e.target.value) })
+          }
+          required
+          className="border p-2 rounded w-full"
+        />
+
+        {/* Category selector */}
+        <select
+          value={formData.category}
+          onChange={(e) =>
+            setFormData({ ...formData, category: e.target.value })
+          }
+          className="border p-2 rounded w-full"
         >
-          <FaTimes />
-        </button>
-
-        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800 text-center">
-          Select Items
-        </h2>
-
-        {/* Categories */}
-        {categories.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6 justify-center">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  activeCategory === cat
-                    ? "bg-red-500 text-white shadow"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-              >
+          {/* Always include "All" as default first option */}
+          <option value="All">All</option>
+          {categories
+            .filter((cat) => cat !== "All")
+            .map((cat) => (
+              <option key={cat} value={cat}>
                 {cat}
-              </button>
+              </option>
             ))}
-          </div>
+        </select>
+
+        <input type="file" accept="image/*" onChange={handleFileChange} />
+        {uploading && <p>Uploading image...</p>}
+        {formData.image && (
+          <img
+            src={formData.image}
+            alt="Preview"
+            className="w-32 h-32 object-cover rounded"
+          />
         )}
 
-        {/* Loading/Error */}
-        {loading ? (
-          <p className="text-center text-gray-500">Loading menu items...</p>
-        ) : error ? (
-          <p className="text-center text-red-600">{error}</p>
-        ) : filteredItems.length === 0 ? (
-          <p className="text-center text-gray-500">No items available</p>
-        ) : (
-          <ul className="max-h-[60vh] overflow-y-auto space-y-2 border rounded-lg p-3">
-            {filteredItems.map((item) => {
-              // const selected = selectedItems.find((i) => i._id === item._id);
-              return (
-                <li
-                  key={item._id}
-                  // onClick={() => toggleSelectItem(item)}
-                  // className={`flex justify-between items-center px-4 py-2 rounded-lg cursor-pointer hover:bg-red-50 transition ${
-                  //   selected ? "bg-red-100 border border-red-400" : ""
-                  // }`}
-                >
-                  <span>{item.name}</span>
-                  {/* {selected && <span className="text-red-500 font-bold">✓</span>} */}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
+        <button
+          type="submit"
+          disabled={uploading}
+          className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition"
+        >
+          {itemToEdit ? "Update Item" : "Add Item"}
+        </button>
+      </form>
     </div>
   );
 }

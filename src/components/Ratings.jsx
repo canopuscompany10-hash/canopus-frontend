@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import UserContext from "../context/UserContext";
 
 const initialRatings = [
@@ -33,33 +33,8 @@ const initialRatings = [
 ];
 
 function Ratings() {
-  const { user, isAdmin } = useContext(UserContext);
+  const { isAdmin } = useContext(UserContext);
   const [ratings, setRatings] = useState(initialRatings);
-  const [showAddPopup, setShowAddPopup] = useState(false);
-  const [newReview, setNewReview] = useState({
-    name: "",
-    rating: 5,
-    comment: "",
-  });
-
-  // Add Review
-  const handleAddReview = () => {
-    if (!newReview.name || !newReview.comment) return alert("Fill all fields!");
-    const newId = ratings.length
-      ? Math.max(...ratings.map((r) => r.id)) + 1
-      : 1;
-    setRatings([
-      ...ratings,
-      {
-        ...newReview,
-        id: newId,
-        image: "https://randomuser.me/api/portraits/lego/1.jpg",
-        hidden: false,
-      },
-    ]);
-    setNewReview({ name: "", rating: 5, comment: "" });
-    setShowAddPopup(false);
-  };
 
   // Admin delete or hide
   const handleDelete = (id) => setRatings(ratings.filter((r) => r.id !== id));
@@ -79,16 +54,6 @@ function Ratings() {
           Here's what some of our happy clients have to say.
         </p>
       </div>
-
-      {/* Add Review Button for User */}
-      {user && !isAdmin && (
-        <button
-          onClick={() => setShowAddPopup(true)}
-          className="absolute top-20 right-6 bg-white text-red-500 px-4 py-2 rounded-full font-semibold hover:bg-white/90"
-        >
-          + Add Review
-        </button>
-      )}
 
       {/* Ratings Scroll */}
       <motion.div
@@ -143,78 +108,6 @@ function Ratings() {
             </div>
           ))}
       </motion.div>
-
-      {/* Add Review Popup */}
-      <AnimatePresence>
-        {showAddPopup && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-white text-red-500 rounded-2xl p-6 w-96 shadow-2xl relative"
-            >
-              <h3 className="text-2xl font-bold mb-5 text-center">
-                Add Review
-              </h3>
-              <div className="flex flex-col gap-3">
-                <input
-                  type="text"
-                  placeholder="Your Name"
-                  className="border border-gray-300 rounded p-2 focus:ring-2 focus:ring-red-400"
-                  value={newReview.name}
-                  onChange={(e) =>
-                    setNewReview({ ...newReview, name: e.target.value })
-                  }
-                />
-                <textarea
-                  placeholder="Your Review"
-                  className="border border-gray-300 rounded p-2 focus:ring-2 focus:ring-red-400"
-                  value={newReview.comment}
-                  onChange={(e) =>
-                    setNewReview({ ...newReview, comment: e.target.value })
-                  }
-                />
-                <label className="text-sm font-semibold text-gray-700">
-                  Rating
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={5}
-                  className="border border-gray-300 rounded p-2 focus:ring-2 focus:ring-red-400"
-                  value={newReview.rating}
-                  onChange={(e) =>
-                    setNewReview({
-                      ...newReview,
-                      rating: parseInt(e.target.value),
-                    })
-                  }
-                />
-              </div>
-              <div className="flex justify-between mt-6">
-                <button
-                  onClick={() => setShowAddPopup(false)}
-                  className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddReview}
-                  className="px-4 py-2 rounded bg-red-500 text-white font-semibold hover:bg-red-600"
-                >
-                  Add
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

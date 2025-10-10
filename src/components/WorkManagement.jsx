@@ -53,17 +53,19 @@ function WorkManagement() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full sm:w-64 px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
         />
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
-        >
-          <FaPlus /> Add
-        </button>
+        {user?.role === "admin" && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+          >
+            <FaPlus /> Add
+          </button>
+        )}
       </div>
 
       {/* Work Cards */}
       {!selectedWork && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 overflow-x-scroll">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredWorks.map((work) => {
             const isAssignedToMe = work.assignedTo?.some(
               (a) => a.user?._id === user?._id
@@ -91,19 +93,25 @@ function WorkManagement() {
                     {work.title}
                   </h3>
 
-                  {/* Status Dropdown */}
-                  <select
-                    value={work.status}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) =>
-                      handleStatusChange(work._id, e.target.value)
-                    }
-                    className={`px-2 py-1 text-xs font-medium rounded-full text-white ${statusColor}`}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="in progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                  </select>
+                  {/* Status */}
+                  {user?.role === "admin" ? (
+                    <select
+                      value={work.status}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => handleStatusChange(work._id, e.target.value)}
+                      className={`px-2 py-1 text-xs font-medium rounded-full text-white ${statusColor}`}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="in progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  ) : (
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full text-white ${statusColor}`}
+                    >
+                      {work.status || "Pending"}
+                    </span>
+                  )}
                 </div>
 
                 {/* Info Row */}
@@ -121,9 +129,7 @@ function WorkManagement() {
                   <span className="flex items-center gap-2">
                     <FaCalendarAlt />
                     <strong>Date:</strong>{" "}
-                    {work.dueDate
-                      ? new Date(work.dueDate).toLocaleDateString()
-                      : "N/A"}
+                    {work.dueDate ? new Date(work.dueDate).toLocaleDateString() : "N/A"}
                   </span>
                 </div>
               </div>
@@ -141,7 +147,9 @@ function WorkManagement() {
       )}
 
       {/* Add Work Modal */}
-      <AddWork isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} />
+      {user?.role === "admin" && (
+        <AddWork isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} />
+      )}
     </div>
   );
 }

@@ -14,8 +14,6 @@ function AppWrapper() {
       <Route path="/login" element={<Login />} />
 
       {/* Protected routes */}
-
-      {/* Admin-only route */}
       <Route
         path="/dashboard"
         element={

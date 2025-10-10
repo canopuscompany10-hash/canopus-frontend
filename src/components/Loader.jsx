@@ -1,15 +1,15 @@
 // src/components/Loader.jsx
 import React from "react";
 import { motion } from "framer-motion";
-import demoIcon from "../assets/homeimage.jpg"; // Demo image
+import demoIcon from "../assets/homeimage.jpg";
 
 function Loader() {
   return (
     <div className="fixed inset-0 bg-red-500 flex items-center justify-center z-50">
-      <div className="relative w-32 h-32">
-        {/* Spinning circle */}
+      <div className="relative w-32 h-32 flex items-center justify-center">
+        {/* Spinning ring */}
         <motion.div
-          className="absolute inset-0 border-4 border-white rounded-full"
+          className="absolute w-32 h-32 border-4 border-t-white border-b-transparent border-l-transparent border-r-transparent rounded-full"
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
         />

@@ -42,10 +42,10 @@ function UserManagement() {
   };
 
   return (
-    <div className="flex flex-col gap-4 md:items-stretch  items-center w-[100%]  mx-auto">
+    <div className="flex flex-col  gap-4  md:w-[100%] w-[90%] px-4 ">
 
       {/* Top Summary Cards */}
-      <div className="grid grid-cols-1 md:w-[100%] w-[90%] sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:w-[100%]  w-[90%] sm:grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { title: "Total Users", count: totalUsers, icon: <FaUsers className="text-3xl text-blue-500" />, bg: "bg-blue-100 text-blue-800" },
           { title: "Admins", count: totalAdmins, icon: <FaUserShield className="text-3xl text-red-500" />, bg: "bg-red-100 text-red-800" },
@@ -54,7 +54,7 @@ function UserManagement() {
         ].map((card, i) => (
           <div
             key={i}
-            className={`${card.bg} rounded-xl p-4 flex flex-col items-center justify-center shadow w-full`}
+            className={`${card.bg} rounded-xl p-4 flex flex-col items-center justify-center shadow w-[100%]`}
           >
             {card.icon}
             <span className="text-lg font-bold mt-2">{card.count}</span>
@@ -92,7 +92,7 @@ function UserManagement() {
 
 
       {/* Users Table */}
-      <div className="overflow-x-auto shadow rounded-xl w-full">
+      <div className="overflow-x-auto shadow rounded-xl md:w-[100%] w-[90%] ">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
             <tr>

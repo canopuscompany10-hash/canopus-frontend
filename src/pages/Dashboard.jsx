@@ -66,7 +66,7 @@ function Dashboard() {
         </div>
 
         {/* Main scrollable content */}
-        <main className="flex-1 p-4 md:px-8 md:py-4 overflow-y-auto">
+        <main className="flex-1  py-4 md:py-4 md:overflow-hidden overflow-y-auto">
           {renderContent()}
         </main>
       </div>

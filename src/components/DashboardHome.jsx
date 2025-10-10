@@ -41,7 +41,9 @@ function DashboardHome() {
 
   if (usersLoading || worksLoading) {
     return (
-      <p className="text-center text-gray-500 mt-10 text-lg">Loading...</p>
+      <p className="text-left text-gray-500 mt-10 text-lg w-full max-w-7xl mx-auto px-4">
+        Loading...
+      </p>
     );
   }
 
@@ -69,37 +71,38 @@ function DashboardHome() {
   ];
 
   return (
-    <div className="space-y-8">
-      <p className="font-semibold text-gray-500">
+    <div className="space-y-8  flex flex-col items-start md:w-[100%] w-[90%] px-4 py-6 ">
+      {/* Welcome Text */}
+      <p className="font-semibold text-gray-500 text-left w-full max-w-7xl">
         Welcome back! Here's your latest overview
       </p>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-[100%]">
         {cardData.map((card, index) => (
           <div
             key={index}
-            className="flex flex-col items-start justify-between p-5 px-7  md:w-full  w-[90%] rounded-md shadow-sm border border-gray-100 hover:shadow-md transform hover:scale-[1.02] transition-all duration-200"
+            className="flex flex-col items-start justify-between p-5 rounded-md shadow-sm border border-gray-100 hover:shadow-md transform hover:scale-[1.02] transition-all duration-200 w-full"
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between w-full">
               <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">
                 {card.title}
               </p>
-              <div className="flex flex-col">{card.icon}</div>
+              <div>{card.icon}</div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800">{card.count}</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mt-3">{card.count}</h2>
           </div>
         ))}
       </div>
 
       {/* Latest Works Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 md:overflow-hidden overflow-scroll">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full  overflow-x-auto md:overflow-hidden">
         <div className="p-4 border-b border-gray-100 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-800">Latest Works</h2>
           <FaCalendarAlt className="text-gray-500" />
         </div>
 
-        <table className="min-w-full text-sm md:overflow-x-hidden overflow-x-scroll">
+        <table className="min-w-full text-sm overflow-x-scroll">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
               <th className="py-3 px-4 text-left">Title</th>
@@ -150,7 +153,7 @@ function DashboardHome() {
               <tr>
                 <td
                   colSpan="4"
-                  className="text-center text-gray-500 py-6 italic"
+                  className="text-left text-gray-500 py-6 italic"
                 >
                   No recent works found.
                 </td>

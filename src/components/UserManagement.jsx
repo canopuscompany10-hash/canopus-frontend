@@ -42,7 +42,7 @@ function UserManagement() {
   };
 
   return (
-    <div className="flex flex-col  gap-4  md:w-[100%]  w-[90%] px-4 ">
+    <div className="flex flex-col  gap-4  md:w-[100%]  w-[90%] px-2 ">
 
       {/* Top Summary Cards */}
       <div className="grid grid-cols-1 md:w-[100%]  w-[90%]  sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -64,7 +64,7 @@ function UserManagement() {
       </div>
 
       {/* Header + Search + Add Button */}
-   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:w-[100%] w-[90%]">
         <h1 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
           <FaUserShield className="text-red-600" /> Manage Users
         </h1>

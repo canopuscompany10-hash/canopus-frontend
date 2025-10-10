@@ -42,10 +42,10 @@ function UserManagement() {
   };
 
   return (
-    <div className="flex flex-col  gap-4  md:w-[100%] w-[90%] px-4 ">
+    <div className="flex flex-col  gap-4  md:w-[100%]   px-4">
 
       {/* Top Summary Cards */}
-      <div className="grid grid-cols-1 md:w-[100%]  w-[90%] sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:w-[100%] bg-yellow-200  sm:grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { title: "Total Users", count: totalUsers, icon: <FaUsers className="text-3xl text-blue-500" />, bg: "bg-blue-100 text-blue-800" },
           { title: "Admins", count: totalAdmins, icon: <FaUserShield className="text-3xl text-red-500" />, bg: "bg-red-100 text-red-800" },

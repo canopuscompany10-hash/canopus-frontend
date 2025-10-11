@@ -42,10 +42,10 @@ function UserManagement() {
   };
 
   return (
-    <div className="flex flex-col  gap-4  md:w-[100%]  w-[90%] px-2 ">
+    <div className="flex flex-col   gap-4  md:w-[100%]  w-[90%] px-2 ">
 
       {/* Top Summary Cards */}
-      <div className="grid grid-cols-1 md:w-[100%]  w-[90%]  sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4    md:w-[100%]  w-[90%]">
         {[
           { title: "Total Users", count: totalUsers, icon: <FaUsers className="text-3xl text-blue-500" />, bg: "bg-blue-100 text-blue-800" },
           { title: "Admins", count: totalAdmins, icon: <FaUserShield className="text-3xl text-red-500" />, bg: "bg-red-100 text-red-800" },
@@ -64,7 +64,7 @@ function UserManagement() {
       </div>
 
       {/* Header + Search + Add Button */}
-   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:w-[100%] w-[90%]">
+   <div className="flex  flex-col md:flex-row md:items-center md:justify-between gap-4 md:w-[100%] w-[90%]">
         <h1 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
           <FaUserShield className="text-red-600" /> Manage Users
         </h1>
@@ -92,7 +92,7 @@ function UserManagement() {
 
 
       {/* Users Table */}
-      <div className="overflow-x-auto shadow rounded-xl md:w-[100%] w-[90%] ">
+      <div className="overflow-x-auto  shadow rounded-xl md:w-[100%] w-[90%] overflow-y-scroll h-[50vh] ">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
             <tr>

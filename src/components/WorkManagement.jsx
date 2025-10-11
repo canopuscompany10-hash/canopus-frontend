@@ -65,7 +65,7 @@ function WorkManagement() {
 
       {/* Work Cards */}
       {!selectedWork && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6overflow-y-scroll">
           {filteredWorks.map((work) => {
             const isAssignedToMe = work.assignedTo?.some(
               (a) => a.user?._id === user?._id

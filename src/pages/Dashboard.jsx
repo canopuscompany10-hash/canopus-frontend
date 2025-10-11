@@ -12,7 +12,6 @@ import SettingsSection from "../components/SettingsSection";
 function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [active, setActive] = useState("Dashboard");
-
   const { user } = useContext(UserContext);
 
   const renderContent = () => {
@@ -20,13 +19,10 @@ function Dashboard() {
       case "Dashboard":
       default:
         return <DashboardHome />;
-
       case "Works":
         return <WorkManagement />;
-
       case "Settings":
         return <SettingsSection />;
-
       case "User Management":
         if (user?.role !== "admin") {
           return (
@@ -53,7 +49,6 @@ function Dashboard() {
       <div className="flex-1 flex flex-col md:ml-64">
         {/* Sticky Top Header with Mobile Menu */}
         <div className="sticky top-0 z-20 bg-gray-50 flex items-center justify-start gap-4 p-4 md:p-6 border-b border-gray-200">
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setSidebarOpen(true)}
             className="md:hidden text-2xl text-gray-600"
@@ -61,12 +56,11 @@ function Dashboard() {
             <FaBars />
           </button>
 
-          {/* Section Title */}
           <h1 className="text-3xl font-bold text-left pt-1">{active}</h1>
         </div>
 
-        {/* Main scrollable content */}
-        <main className="flex-1  py-4 md:py-4  overflow-y-auto">
+        {/* Scrollable content */}
+        <main className="flex-1 overflow-y-auto py-4 md:py-6 px-4">
           {renderContent()}
         </main>
       </div>

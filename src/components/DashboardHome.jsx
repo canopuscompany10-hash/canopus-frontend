@@ -41,9 +41,7 @@ function DashboardHome() {
 
   if (usersLoading || worksLoading) {
     return (
-      <p className="text-left text-gray-500 mt-10 text-lg w-full max-w-7xl mx-auto px-4">
-        Loading...
-      </p>
+      <p className="text-center text-gray-500 mt-10 text-lg">Loading...</p>
     );
   }
 
@@ -71,14 +69,13 @@ function DashboardHome() {
   ];
 
   return (
-    <div className="space-y-8  flex flex-col items-start md:w-[100%] w-[90%] px-4 py-6 ">
-      {/* Welcome Text */}
-      <p className="font-semibold text-gray-500 text-left w-full max-w-7xl">
+    <div className="space-y-8 flex flex-col items-start w-full px-4 py-6">
+      <p className="font-semibold text-gray-500 text-left w-full">
         Welcome back! Here's your latest overview
       </p>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-[100%]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
         {cardData.map((card, index) => (
           <div
             key={index}
@@ -90,19 +87,21 @@ function DashboardHome() {
               </p>
               <div>{card.icon}</div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mt-3">{card.count}</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mt-3">
+              {card.count}
+            </h2>
           </div>
         ))}
       </div>
 
       {/* Latest Works Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full  overflow-x-auto md:overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-x-auto">
         <div className="p-4 border-b border-gray-100 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-800">Latest Works</h2>
           <FaCalendarAlt className="text-gray-500" />
         </div>
 
-        <table className="min-w-full text-sm overflow-x-scroll">
+        <table className="min-w-full text-sm">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
               <th className="py-3 px-4 text-left">Title</th>
@@ -136,7 +135,7 @@ function DashboardHome() {
                     </span>
                   </td>
                   <td className="py-3 px-4 text-gray-600">
-                    {work.assignedTo && work.assignedTo.length > 0
+                    {work.assignedTo?.length
                       ? work.assignedTo
                           .map((a) => a.user?.name || a.name || "Unnamed")
                           .join(", ")
@@ -153,7 +152,7 @@ function DashboardHome() {
               <tr>
                 <td
                   colSpan="4"
-                  className="text-left text-gray-500 py-6 italic"
+                  className="text-center text-gray-500 py-6 italic"
                 >
                   No recent works found.
                 </td>

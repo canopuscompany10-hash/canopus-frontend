@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaTimes, FaPlus, FaTrash } from "react-icons/fa";
 
 function PaymentPopup({ isOpen, onClose, staff, onUpdate }) {
   const [amountPaid, setAmountPaid] = useState(staff.amountPaid || 0);
-  const [paymentStatus, setPaymentStatus] = useState(staff.paymentStatus || "pending");
   const [violations, setViolations] = useState(staff.violations || []);
+
+  useEffect(() => {
+    setAmountPaid(staff.amountPaid || 0);
+    setViolations(staff.violations || []);
+  }, [staff]);
 
   if (!isOpen) return null;
 
@@ -26,11 +30,16 @@ function PaymentPopup({ isOpen, onClose, staff, onUpdate }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Automatically set paymentStatus to "completed" if fully paid
+    const paymentStatus = amountPaid >= (staff.assignedAmount || 0) ? "completed" : "pending";
+
     onUpdate({
       amountPaid: parseFloat(amountPaid),
       paymentStatus,
       violations,
     });
+
     onClose();
   };
 
@@ -53,18 +62,6 @@ function PaymentPopup({ isOpen, onClose, staff, onUpdate }) {
               onChange={(e) => setAmountPaid(e.target.value)}
               className="w-full border p-2 rounded"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Payment Status</label>
-            <select
-              value={paymentStatus}
-              onChange={(e) => setPaymentStatus(e.target.value)}
-              className="w-full border p-2 rounded"
-            >
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
-            </select>
           </div>
 
           <div>
@@ -100,7 +97,7 @@ function PaymentPopup({ isOpen, onClose, staff, onUpdate }) {
             type="submit"
             className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            Update
+            Update Payment
           </button>
         </form>
       </div>

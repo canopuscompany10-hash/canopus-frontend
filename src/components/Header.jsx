@@ -41,7 +41,7 @@ function Header() {
   };
 
   const handleProfileClick = () => {
-    if (user?.role === "admin") {
+    if (user?.role === "admin"  || user.role === "superadmin") {
       navigate("/dashboard");
     }
   };
@@ -166,7 +166,7 @@ function Header() {
               className="flex flex-col items-center space-y-2 cursor-pointer"
               onClick={() => {
                 toggleMenu();
-                if (user.role === "admin") {
+                if (user.role === "admin" || user.role === "superadmin") {
                   navigate("/dashboard");
                 }
               }}

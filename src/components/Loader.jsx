@@ -11,7 +11,7 @@ function Loader() {
         <motion.div
           className="absolute w-32 h-32 border-4 border-t-white border-b-transparent border-l-transparent border-r-transparent rounded-full"
           animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }} 
         />
         {/* Center icon */}
         <img

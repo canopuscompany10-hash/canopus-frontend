@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import {
   FaTimes,
   FaUserTie,
+  FaCalendarAlt,
   FaTasks,
   FaCog,
   FaSignOutAlt,
@@ -9,21 +10,32 @@ import {
 } from "react-icons/fa";
 import UserContext from "../context/UserContext";
 
-function AdminSidebar({ active, setActive, sidebarOpen, setSidebarOpen }) {
+function DashboardSidebar({ active, setActive, sidebarOpen, setSidebarOpen }) {
   const { user, logoutUser } = useContext(UserContext);
 
+  // Base menu for all staff
   let menuItems = [
     { label: "Dashboard", icon: <FaUserTie /> },
     { label: "Works", icon: <FaTasks /> },
   ];
 
-  if (user?.role === "admin") {
+  // Add User Management for admin & super admin only
+  if (user?.role === "admin" || user?.role === "superadmin") {
     menuItems.push({ label: "User Management", icon: <FaUsers /> });
   }
 
+  // Settings & Logout for all
   menuItems.push(
     { label: "Settings", icon: <FaCog /> },
-    { label: "Logout", icon: <FaSignOutAlt />, action: logoutUser }
+    {
+      label: "Logout",
+      icon: <FaSignOutAlt />,
+      action: () => {
+        if (window.confirm("Are you sure you want to logout?")) {
+          logoutUser();
+        }
+      },
+    }
   );
 
   return (
@@ -33,10 +45,9 @@ function AdminSidebar({ active, setActive, sidebarOpen, setSidebarOpen }) {
       ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
       md:translate-x-0`}
     >
+      {/* Header */}
       <div className="flex justify-between items-center md:block border-b border-white">
-        <h1 className="text-3xl font-bold mb-6 kaushan-script-regular">
-          Canopus
-        </h1>
+        <h1 className="text-3xl font-bold mb-2 kaushan-script-regular">Canopus</h1>
         <button
           className="md:hidden text-white text-2xl"
           onClick={() => setSidebarOpen(false)}
@@ -51,16 +62,12 @@ function AdminSidebar({ active, setActive, sidebarOpen, setSidebarOpen }) {
           <button
             key={item.label}
             onClick={() => {
-              if (item.action) return item.action();
+              if (item.action) return item.action(); // handle logout with confirmation
               setActive(item.label);
               setSidebarOpen(false);
             }}
             className={`flex items-center gap-3 p-3 rounded-xl text-left font-medium transition-all duration-200
-              ${
-                active === item.label
-                  ? "bg-white/20 shadow-lg backdrop-blur-md"
-                  : "hover:bg-white/10"
-              }`}
+              ${active === item.label ? "bg-white/20 shadow-lg backdrop-blur-md" : "hover:bg-white/10"}`}
           >
             <span className="text-lg">{item.icon}</span>
             <span>{item.label}</span>
@@ -78,4 +85,4 @@ function AdminSidebar({ active, setActive, sidebarOpen, setSidebarOpen }) {
   );
 }
 
-export default AdminSidebar;
+export default DashboardSidebar;

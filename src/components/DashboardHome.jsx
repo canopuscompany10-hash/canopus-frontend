@@ -41,7 +41,9 @@ function DashboardHome() {
 
   if (usersLoading || worksLoading) {
     return (
-      <p className="text-center text-gray-500 mt-10 text-lg">Loading...</p>
+      <p className="text-left text-gray-500 mt-10 text-lg w-full max-w-7xl mx-auto px-4">
+        Loading...
+      </p>
     );
   }
 
@@ -69,8 +71,9 @@ function DashboardHome() {
   ];
 
   return (
-    <div className="space-y-8 flex flex-col items-start w-full px-4 py-6">
-      <p className="font-semibold text-gray-500 text-left w-full">
+    <div className="space-y-8 flex flex-col items-start md:w-full w-full px-4 py-6">
+      {/* Welcome Text */}
+      <p className="font-semibold text-gray-500 text-left w-full max-w-7xl">
         Welcome back! Here's your latest overview
       </p>
 
@@ -87,79 +90,91 @@ function DashboardHome() {
               </p>
               <div>{card.icon}</div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mt-3">
-              {card.count}
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-800 mt-3">{card.count}</h2>
           </div>
         ))}
       </div>
 
-      {/* Latest Works Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-x-auto">
+      {/* Latest Works Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-y-scroll h-[50vh]">
         <div className="p-4 border-b border-gray-100 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-800">Latest Works</h2>
           <FaCalendarAlt className="text-gray-500" />
         </div>
 
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-100 text-gray-700">
-            <tr>
-              <th className="py-3 px-4 text-left">Title</th>
-              <th className="py-3 px-4 text-left">Status</th>
-              <th className="py-3 px-4 text-left">Assigned To</th>
-              <th className="py-3 px-4 text-left">Due Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {latestWorks.length > 0 ? (
-              latestWorks.map((work) => (
-                <tr
-                  key={work._id}
-                  className="border-t hover:bg-gray-50 transition-all duration-150"
-                >
-                  <td className="py-3 px-4 font-semibold text-gray-800">
-                    {work.title}
-                  </td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        work.status.toLowerCase() === "done" ||
-                        work.status.toLowerCase() === "completed"
-                          ? "bg-green-100 text-green-700"
-                          : work.status.toLowerCase() === "in-progress"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {work.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-gray-600">
-                    {work.assignedTo?.length
-                      ? work.assignedTo
-                          .map((a) => a.user?.name || a.name || "Unnamed")
-                          .join(", ")
-                      : "Not assigned"}
-                  </td>
-                  <td className="py-3 px-4 text-gray-600">
-                    {work.dueDate
-                      ? new Date(work.dueDate).toLocaleDateString()
-                      : "—"}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="4"
-                  className="text-center text-gray-500 py-6 italic"
-                >
-                  No recent works found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <div className="flex flex-col w-full">
+          {/* Table header for large screens */}
+          <div className="hidden sm:flex bg-gray-100 font-semibold text-gray-700 px-4 py-2">
+            <div className="w-1/4">Title</div>
+            <div className="w-1/4">Status</div>
+            <div className="w-1/4">Assigned To</div>
+            <div className="w-1/4">Due Date</div>
+          </div>
+
+          {/* Rows */}
+          {latestWorks.length > 0 ? (
+            latestWorks.map((work) => (
+              <div
+                key={work._id}
+                className="flex flex-col sm:flex-row border-t hover:bg-gray-50 transition-all duration-150 px-4 py-3 gap-1 sm:gap-0"
+              >
+                {/* Title */}
+                <div className="flex justify-between sm:w-1/4 w-full">
+                  <span className="font-semibold text-gray-800">{work.title}</span>
+
+                  {/* Status visible on small screens beside title */}
+                  <span
+                    className={`sm:hidden px-3 py-1 rounded-full text-xs font-semibold ${
+                      work.status.toLowerCase() === "done" ||
+                      work.status.toLowerCase() === "completed"
+                        ? "bg-green-100 text-green-700"
+                        : work.status.toLowerCase() === "in-progress"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {work.status}
+                  </span>
+                </div>
+
+                {/* Status for large screens */}
+                <div className="hidden sm:block sm:w-1/4 mt-1 sm:mt-0">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      work.status.toLowerCase() === "done" ||
+                      work.status.toLowerCase() === "completed"
+                        ? "bg-green-100 text-green-700"
+                        : work.status.toLowerCase() === "in-progress"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {work.status}
+                  </span>
+                </div>
+
+               {/* Assigned To (hide on small screens) */}
+<div className="w-full sm:w-1/4 mt-1 sm:mt-0 text-gray-600  hidden sm:block">
+  <div className="overflow-x-auto whitespace-nowrap">
+    {work.assignedTo && work.assignedTo.length > 0
+      ? work.assignedTo
+          .map((a) => a.user?.name || a.name || "Unnamed")
+          .join(", ")
+      : "Not assigned"}
+  </div>
+</div>
+
+
+                {/* Due Date (hide on small screens) */}
+                <div className="w-full sm:w-1/4 mt-1 sm:mt-0 text-gray-600 hidden sm:block">
+                  {work.dueDate ? new Date(work.dueDate).toLocaleDateString() : "—"}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="px-4 py-6 text-gray-500 italic">No recent works found.</div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ export const UserProvider = ({ children }) => {
   const [notifications, setNotifications] = useState({ email: true, whatsapp: true });
   const [loading, setLoading] = useState(true);
 
-  // ✅ Load user & token on startup
+  // Load user & token on startup
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
@@ -18,25 +18,24 @@ export const UserProvider = ({ children }) => {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
       setNotifications(parsedUser.notifications || { email: true, whatsapp: true });
-
-      // Attach token globally for all Axios requests
       AxiosInstance.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
     }
 
     fetchAllUsers().finally(() => setLoading(false));
   }, []);
 
-  // ✅ Fetch all users
+  // Fetch all users
   const fetchAllUsers = async () => {
     try {
       const res = await AxiosInstance.get("/user/all");
       setAllUsers(res.data || []);
+      
     } catch (err) {
       console.error("Fetch Users Error:", err.response?.data || err);
     }
   };
 
-  // ✅ Create new user (admin only)
+  // Create new user
   const createUser = async (userData) => {
     try {
       const res = await AxiosInstance.post("/user/create", userData);
@@ -49,7 +48,7 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  // ✅ Login user
+  // Login user
   const loginUser = async (email, password) => {
     try {
       const res = await AxiosInstance.post("/user/login", { email, password });
@@ -68,7 +67,7 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  // ✅ Update user
+  // Update user
   const updateUser = async (updates) => {
     if (!user) return;
     try {
@@ -85,7 +84,7 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  // ✅ Update notification preferences
+  // Update notification preferences
   const updateNotifications = async (prefs) => {
     if (!user) return;
     try {
@@ -101,15 +100,8 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  // ✅ Toggle attendance locally (for demo/tracking)
-  const toggleAttendance = () => {
-    if (!user) return;
-    const updated = { ...user, attendance: !user.attendance };
-    setUser(updated);
-    localStorage.setItem("user", JSON.stringify(updated));
-  };
 
-  // ✅ Logout
+  // Logout
   const logoutUser = () => {
     setUser(null);
     setAllUsers([]);
@@ -117,6 +109,19 @@ export const UserProvider = ({ children }) => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     delete AxiosInstance.defaults.headers.common["Authorization"];
+  };
+
+  // Delete user
+  const deleteUser = async (userId) => {
+    try {
+      await AxiosInstance.delete(`/user/${userId}`);
+      setAllUsers((prev) => prev.filter((u) => u._id !== userId));
+      if (user?._id === userId) logoutUser();
+      return true;
+    } catch (err) {
+      console.error("Delete User Error:", err.response?.data || err);
+      throw err;
+    }
   };
 
   return (
@@ -131,9 +136,9 @@ export const UserProvider = ({ children }) => {
         loginUser,
         updateUser,
         updateNotifications,
-        toggleAttendance,
         logoutUser,
         fetchAllUsers,
+        deleteUser,
       }}
     >
       {children}

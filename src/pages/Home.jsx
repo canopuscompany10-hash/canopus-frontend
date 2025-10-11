@@ -7,7 +7,21 @@ import Ratings from "../components/Ratings";
 import Gallery from "../components/Gallery";
 import Footer from "../components/Footer";
 import homeimage from "../assets/homeimage.jpg";
+
 function Home() {
+  // Access WhatsApp number from env
+const whatsappNumber = 9744850680
+
+  const handleBookingClick = () => {
+    if (!whatsappNumber) {
+      alert("WhatsApp number is not set in environment variables!");
+      return;
+    }
+    const message = encodeURIComponent(
+      "Hello Canopus! I would like to book your catering services."
+    );
+    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
+  };
 
   return (
     <>
@@ -34,7 +48,7 @@ function Home() {
           <motion.button
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setShowBooking(true)} // ✅ show popup
+            onClick={handleBookingClick}
             className="bg-white text-red-600 font-semibold py-3 px-8 rounded-full shadow-md hover:bg-gray-100 transition-all duration-300"
           >
             Book Now
@@ -48,7 +62,6 @@ function Home() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1 }}
         >
-          {/* Images here (as in your code) */}
           <div className="flex flex-col items-center">
             <img
               src={homeimage}
@@ -87,7 +100,6 @@ function Home() {
       <Ratings />
       <Gallery />
       <Footer />
-
     </>
   );
 }

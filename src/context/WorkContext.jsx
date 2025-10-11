@@ -9,15 +9,14 @@ export const WorkProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  // ✅ Fetch all works
+  // Fetch all works
   const fetchWorks = async () => {
     try {
       setLoading(true);
       const res = await AxiosInstance.get("/work");
-      setWorks(res.data || []);
-      console.log(res.data, "Fetched works");
+      setWorks(res.data);
     } catch (err) {
-      console.error("Fetch Works Error:", err.response?.data || err);
+      console.error("Fetch Works Error:", err);
       toast.error("Failed to fetch works.");
       setMessage("Failed to fetch works.");
     } finally {
@@ -25,7 +24,7 @@ export const WorkProvider = ({ children }) => {
     }
   };
 
-  // ✅ Normalize assigned users
+  // Normalize assigned users
   const normalizeAssignedTo = (assignedTo) => {
     if (!assignedTo) return [];
     if (!Array.isArray(assignedTo)) assignedTo = [assignedTo];
@@ -35,36 +34,36 @@ export const WorkProvider = ({ children }) => {
           ? item
           : item?.value || item?.user?._id || item?._id
       )
-      .filter(Boolean);
+      .filter(Boolean)
+      .map((id) => ({ user: id, amountPaid: 0, paymentStatus: "pending", violations: [] }));
   };
 
-  // ✅ Add new work
+  // Add new work
   const addWork = async (workData) => {
     try {
       workData.assignedTo = normalizeAssignedTo(workData.assignedTo);
       if (workData.budget) workData.budget = parseFloat(workData.budget);
-      if (!workData.totalMembers)
-        workData.totalMembers = workData.assignedTo.length;
+      if (!workData.totalMembers) workData.totalMembers = workData.assignedTo.length;
+      workData.overallPaymentStatus = "pending";
 
       const res = await AxiosInstance.post("/work", workData);
       setWorks((prev) => [...prev, res.data.work]);
       toast.success("Work added successfully!");
       setMessage("Work added successfully.");
     } catch (err) {
-      console.error("Add Work Error:", err.response?.data || err);
-      toast.error(err?.response?.data?.message || "Add work failed");
-      setMessage("Add work failed.");
+      console.error("Add Work Error:", err);
+      toast.error(err.response?.data?.message || "Add work failed");
+      setMessage(err.response?.data?.message || "Add work failed");
     }
   };
 
-  // ✅ Update work
+  // Update work
   const updateWork = async (workId, updatedData) => {
     try {
       if (updatedData.assignedTo)
         updatedData.assignedTo = normalizeAssignedTo(updatedData.assignedTo);
 
       if (updatedData.budget) updatedData.budget = parseFloat(updatedData.budget);
-
       if (updatedData.totalMembers !== undefined)
         updatedData.totalMembers = parseInt(updatedData.totalMembers);
 
@@ -72,22 +71,16 @@ export const WorkProvider = ({ children }) => {
       setWorks((prev) =>
         prev.map((w) => (w._id === workId ? res.data.work : w))
       );
-      console.log(res.data, "Updated work");
       toast.success("Work updated successfully!");
       setMessage("Work updated successfully.");
     } catch (err) {
-      console.error("Update Work Error:", err.response?.data || err);
-      toast.error(err?.response?.data?.message || "Update work failed");
+      console.error("Update Work Error:", err);
+      toast.error(err.response?.data?.message || "Update work failed");
       setMessage("Update work failed.");
     }
   };
 
-  // ✅ New: Update only work status
-  const updateWorkStatus = async (workId, statusData) => {
-    return updateWork(workId, statusData);
-  };
-
-  // ✅ Delete work
+  // Delete work
   const deleteWork = async (workId) => {
     try {
       await AxiosInstance.delete(`/work/${workId}`);
@@ -95,47 +88,53 @@ export const WorkProvider = ({ children }) => {
       toast.success("Work deleted successfully!");
       setMessage("Work deleted successfully.");
     } catch (err) {
-      console.error("Delete Work Error:", err.response?.data || err);
-      toast.error(err?.response?.data?.message || "Delete work failed");
-      setMessage("Delete work failed.");
+      console.error("Delete Work Error:", err);
+      toast.error(err.response?.data?.message || "Delete work failed");
+      setMessage("Delete work failed");
     }
   };
 
-  // ✅ Update individual staff payment/performance
+  // Update staff payment & recalc overall payment status
   const updateStaffPayment = async (workId, staffId, data) => {
     try {
       if (data.amountPaid !== undefined) data.amountPaid = parseFloat(data.amountPaid);
       if (!Array.isArray(data.violations)) data.violations = [];
 
-      const res = await AxiosInstance.patch(
-        `/work/${workId}/staff/${staffId}`,
-        data
-      );
+      const res = await AxiosInstance.patch(`/work/${workId}/staff/${staffId}`, data);
+      const updatedWork = res.data.work;
+
       setWorks((prev) =>
-        prev.map((w) => (w._id === workId ? res.data.work : w))
+        prev.map((w) => (w._id === workId ? updatedWork : w))
       );
+
       toast.success("Staff payment updated!");
       setMessage("Staff payment updated.");
     } catch (err) {
-      console.error("Update Staff Payment Error:", err.response?.data || err);
-      toast.error(err?.response?.data?.message || "Failed to update staff payment");
-      setMessage("Failed to update staff payment.");
+      console.error("Update Staff Payment Error:", err);
+      toast.error(err.response?.data?.message || "Failed to update staff payment");
+      setMessage("Failed to update staff payment");
     }
   };
 
-  // ✅ Fetch single work
-  const fetchWorkWithStatus = async (workId) => {
-    try {
-      const res = await AxiosInstance.get(`/work/${workId}`);
-      console.log(res.data, "Fetched single work");
-      return res.data;
-    } catch (err) {
-      console.error("Fetch Work Error:", err.response?.data || err);
-      toast.error(err?.response?.data?.message || "Failed to fetch work");
-      setMessage("Failed to fetch work details.");
-      return null;
-    }
-  };
+  
+const updateWorkStatus = async (workId, status) => {
+  try {
+    // ✅ status should be a string
+    const res = await AxiosInstance.patch(`/work/${workId}/status`, { status });
+
+    // Update local state
+    setWorks(prev =>
+      prev.map((w) => (w._id === workId ? res.data.work : w))
+    );
+
+    toast.success("Work status updated!");
+  } catch (err) {
+    console.error("Update Work Status Error:", err);
+    toast.error("Failed to update work status");
+  }
+};
+
+
 
   useEffect(() => {
     fetchWorks();
@@ -150,10 +149,9 @@ export const WorkProvider = ({ children }) => {
         fetchWorks,
         addWork,
         updateWork,
-        updateWorkStatus, // ✅ Added here
         deleteWork,
         updateStaffPayment,
-        fetchWorkWithStatus,
+        updateWorkStatus, //  provide this function
         setMessage,
       }}
     >

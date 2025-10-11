@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (adminOnly && user.role !== "admin" && user.role !== "manager" && user.role !== "staff") {
+  if (adminOnly && user.role !== "admin" && user.role !== "superadmin" && user.role !== "staff") {
     // Not authorized
     return <Navigate to="/" replace />;
   }

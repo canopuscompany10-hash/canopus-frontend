@@ -22,18 +22,14 @@ function Menu() {
   const { user } = useContext(UserContext);
   const role = user?.role || "customer";
 
-  // Default active category is "All"
   const [activeCategory, setActiveCategory] = useState("All");
   const [showAddPopup, setShowAddPopup] = useState(false);
-  const [showMenuPopup, setShowMenuPopup] = useState(false);
   const [newCategory, setNewCategory] = useState("");
 
-  // Fetch menu items on page change
   useEffect(() => {
     fetchMenuItems(page);
   }, [page]);
 
-  // Ensure default category exists
   useEffect(() => {
     if (!categories.includes("All")) {
       setActiveCategory(categories[0] || "All");
@@ -42,7 +38,6 @@ function Menu() {
     }
   }, [categories]);
 
-  // Filter items: "All" shows everything
   const filteredItems =
     activeCategory === "All"
       ? menuItems
@@ -70,16 +65,11 @@ function Menu() {
       )
     ) {
       try {
-        // Delete the category
         await deleteCategory(cat);
-
-        // Delete all menu items in that category
         const itemsInCategory = menuItems.filter((item) => item.category === cat);
         for (let item of itemsInCategory) {
           await deleteMenuItem(item._id);
         }
-
-        // Reset active category if it was deleted
         if (activeCategory === cat) setActiveCategory("All");
       } catch (err) {
         console.error("Failed to delete category or items:", err);
@@ -95,8 +85,10 @@ function Menu() {
         <h2 className="kaushan-script-regular text-4xl md:text-5xl text-center">
           Catering Menu
         </h2>
+
+        {/* Only admin and super-admin can add items */}
         <div className="absolute top-0 right-0">
-          {role === "admin" ? (
+          {(role === "admin" || role === "superadmin") && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -104,15 +96,6 @@ function Menu() {
               className="bg-white text-red-500 font-semibold px-4 py-2 rounded-full shadow-md"
             >
               + Add Item
-            </motion.button>
-          ) : (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowMenuPopup(true)}
-              className="bg-white text-red-500 font-semibold px-4 py-2 rounded-full shadow-md"
-            >
-              Select Items
             </motion.button>
           )}
         </div>
@@ -132,7 +115,9 @@ function Menu() {
             >
               {cat}
             </button>
-            {role === "admin" && !["All"].includes(cat) && (
+
+            {/* Only admin/super-admin can delete category */}
+            {(role === "admin" || role === "superadmin") && !["All"].includes(cat) && (
               <button
                 onClick={() => handleDeleteCategory(cat)}
                 className="absolute -top-2 -right-2 bg-black text-white rounded-full w-5 h-5 flex justify-center items-center text-xs hover:bg-gray-800 transition"
@@ -142,7 +127,9 @@ function Menu() {
             )}
           </div>
         ))}
-        {role === "admin" && (
+
+        {/* Add new category input only for admin/super-admin */}
+        {(role === "admin" || role === "superadmin") && (
           <div className="ml-4 flex gap-2 items-center">
             <input
               type="text"
@@ -215,7 +202,7 @@ function Menu() {
 
       {/* Add Item Popup */}
       <AnimatePresence>
-        {showAddPopup && role === "admin" && (
+        {showAddPopup && (role === "admin" || role === "superadmin") && (
           <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4 overflow-auto">
             <div className="bg-white text-red-500 rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
               <h2 className="text-2xl font-bold mb-4 text-center text-red-500">
@@ -231,11 +218,6 @@ function Menu() {
             </div>
           </div>
         )}
-      </AnimatePresence>
-
-      {/* Customer popup */}
-      <AnimatePresence>
-        {showMenuPopup && <MenuPopup onClose={() => setShowMenuPopup(false)} />}
       </AnimatePresence>
     </div>
   );

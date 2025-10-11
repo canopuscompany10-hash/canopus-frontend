@@ -12,14 +12,13 @@ const GalleryCard = memo(({ img, deleteImage, role }) => (
     transition={{ duration: 0.5 }}
     className="overflow-hidden rounded-xl shadow-lg relative"
   >
-    
     <img
       src={img.image}
       alt="Gallery"
       loading="lazy"
       className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
     />
-    {role === "admin" && (
+    {role === "admin" || role === "superadmin" ? (
       <button
         onClick={() => {
           if (window.confirm("Are you sure you want to delete this image?")) {
@@ -30,7 +29,7 @@ const GalleryCard = memo(({ img, deleteImage, role }) => (
       >
         Delete
       </button>
-    )}
+    ) : null}
   </motion.div>
 ));
 
@@ -43,7 +42,7 @@ function Gallery() {
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [newImage, setNewImage] = useState(null);
   const [previewImg, setPreviewImg] = useState(null);
- const [adding, setAdding] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   // File preview
   const handleImageUpload = (e) => {
@@ -55,29 +54,28 @@ function Gallery() {
     setNewImage(file);
   };
 
-
-const handleAddImage = async () => {
-  if (!newImage) return alert("Please select an image!");
-  try {
-    setAdding(true); // start loader
-    await addImage(newImage);
-    setNewImage(null);
-    setPreviewImg(null);
-    setShowAddPopup(false);
-  } catch (err) {
-    console.error(err);
-    alert("Failed to add image");
-  } finally {
-    setAdding(false); // stop loader
-  }
-};
+  const handleAddImage = async () => {
+    if (!newImage) return alert("Please select an image!");
+    try {
+      setAdding(true); // start loader
+      await addImage(newImage);
+      setNewImage(null);
+      setPreviewImg(null);
+      setShowAddPopup(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add image");
+    } finally {
+      setAdding(false); // stop loader
+    }
+  };
 
   return (
     <div id="gallery" className="py-12 bg-gray-100 relative">
       <h2 className="text-3xl font-bold text-center mb-8">Gallery</h2>
 
       {/* Admin Add Button */}
-      {role === "admin" && (
+      {(role === "admin" || role === "superadmin") && (
         <button
           onClick={() => setShowAddPopup(true)}
           className="absolute top-6 right-6 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition"
@@ -130,7 +128,7 @@ const handleAddImage = async () => {
 
       {/* Add Image Popup */}
       <AnimatePresence>
-        {showAddPopup && role === "admin" && (
+        {showAddPopup && (role === "admin" || role === "superadmin") && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -171,16 +169,15 @@ const handleAddImage = async () => {
                 >
                   Cancel
                 </button>
-               <button
-  onClick={handleAddImage}
-  disabled={adding}
-  className={`px-4 py-2 rounded text-white ${
-    adding ? "bg-gray-400 cursor-not-allowed" : "bg-red-500 hover:bg-red-600"
-  } transition`}
->
-  {adding ? "Adding..." : "Add"}
-</button>
-
+                <button
+                  onClick={handleAddImage}
+                  disabled={adding}
+                  className={`px-4 py-2 rounded text-white ${
+                    adding ? "bg-gray-400 cursor-not-allowed" : "bg-red-500 hover:bg-red-600"
+                  } transition`}
+                >
+                  {adding ? "Adding..." : "Add"}
+                </button>
               </div>
             </motion.div>
           </motion.div>

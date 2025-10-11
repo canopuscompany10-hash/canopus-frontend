@@ -22,10 +22,7 @@ function SEOHandler() {
       title = "Home | Catering Canopus";
       description =
         "Welcome to Catering Canopus — manage your catering services with ease.";
-    } else if (location.pathname.includes("/offerings")) {
-      title = "Offerings | Catering Canopus";
-      description =
-        "Explore our diverse catering offerings and packages for every occasion.";
+    
     } else if (location.pathname.includes("/dashboard")) {
       title = "Dashboard | Catering Canopus";
       description =
@@ -35,6 +32,12 @@ function SEOHandler() {
       description =
         "Login to your Catering Canopus account to manage your operations.";
     }
+
+// else if (location.pathname.includes("/offerings")) {
+//       title = "Offerings | Catering Canopus";
+//       description =
+//         "Explore our diverse catering offerings and packages for every occasion.";
+
 
     document.title = title;
 

@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import loginImage from "../assets/loginimage.jpg";
 import UserContext from "../context/UserContext";
 
@@ -24,7 +24,7 @@ function Login() {
       setError("Please enter a valid email address.");
       return false;
     }
-   
+
     setError("");
     return true;
   };
@@ -98,6 +98,15 @@ function Login() {
                 className="p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-400 transition"
                 required
               />
+            </div>
+
+            <div className="flex justify-center">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-red-600 hover:underline"
+              >
+                Forgot Password?
+              </Link>
             </div>
 
             <button

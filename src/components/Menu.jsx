@@ -79,7 +79,7 @@ function Menu() {
   };
 
   return (
-    <div className="min-h-screen py-16 px-6 md:px-20 bg-red-500 text-white relative overflow-hidden">
+    <div id="menu" className="min-h-screen py-16 px-6 md:px-20 bg-red-500 text-white relative overflow-hidden">
       {/* Header */}
       <div className="relative mb-10">
         <h2 className="kaushan-script-regular text-4xl md:text-5xl text-center">

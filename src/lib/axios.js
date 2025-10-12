@@ -1,6 +1,6 @@
 import axios from "axios";
 const AxiosInstance = axios.create({
-  baseURL: "http://localhost:4000/api/",
+  baseURL: "https://canopus-backend-ydod.onrender.com/api/",
   headers: {
     "Content-Type": "application/json",
   },

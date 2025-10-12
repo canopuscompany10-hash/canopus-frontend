@@ -10,13 +10,14 @@ export const MenuProvider = ({ children }) => {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 10;
+  // const limit = 16;
 
   // Fetch menu items
   const fetchMenuItems = async (pageNum = page) => {
     setLoading(true);
     try {
-      const res = await AxiosInstance.get(`/menu?page=${pageNum}&limit=${limit}`);
+      const res = await AxiosInstance.get(`/menu?page=${pageNum}`);
+      // &limit=${limit}
       setMenuItems(res.data.items || []);
       setTotalPages(res.data.totalPages || 1);
       setError("");

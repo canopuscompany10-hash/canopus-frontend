@@ -21,15 +21,14 @@ export const UserProvider = ({ children }) => {
       AxiosInstance.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
     }
 
-    fetchAllUsers().finally(() => setLoading(false));
+    fetchUsersWithWorkCompleted().finally(() => setLoading(false));
   }, []);
 
-  // Fetch all users
-  const fetchAllUsers = async () => {
+  // Fetch all users with total work completed
+  const fetchUsersWithWorkCompleted = async () => {
     try {
-      const res = await AxiosInstance.get("/user/all");
+      const res = await AxiosInstance.get("/user/with-work");
       setAllUsers(res.data || []);
-      
     } catch (err) {
       console.error("Fetch Users Error:", err.response?.data || err);
     }
@@ -59,7 +58,7 @@ export const UserProvider = ({ children }) => {
       localStorage.setItem("token", token);
 
       AxiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      await fetchAllUsers();
+      await fetchUsersWithWorkCompleted();
       return loggedInUser;
     } catch (err) {
       console.error("Login Error:", err.response?.data || err);
@@ -76,7 +75,7 @@ export const UserProvider = ({ children }) => {
 
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
-      await fetchAllUsers();
+      await fetchUsersWithWorkCompleted();
       return updatedUser;
     } catch (err) {
       console.error("Update User Error:", err.response?.data || err);
@@ -99,7 +98,6 @@ export const UserProvider = ({ children }) => {
       console.error("Update Notifications Error:", err.response?.data || err);
     }
   };
-
 
   // Logout
   const logoutUser = () => {
@@ -124,6 +122,19 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+
+  const fetchUserWithWork = async (userId) => {
+  try {
+    const res = await AxiosInstance.get(`/user/with-work/${userId}`);
+    console.log(res.data); 
+    return res.data;
+  } catch (err) {
+    console.error("Fetch User With Work Error:", err.response?.data || err);
+  }
+};
+
+
+
   return (
     <UserContext.Provider
       value={{
@@ -137,7 +148,8 @@ export const UserProvider = ({ children }) => {
         updateUser,
         updateNotifications,
         logoutUser,
-        fetchAllUsers,
+        fetchUsersWithWorkCompleted,
+        fetchUserWithWork,
         deleteUser,
       }}
     >

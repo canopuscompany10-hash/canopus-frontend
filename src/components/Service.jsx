@@ -1,5 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { FaArrowRight } from "react-icons/fa";
 
 // Example images (replace with your actual images)
 import weddingImg from "../assets/weddingImg.jpeg";
@@ -7,12 +9,15 @@ import cateringTeamImg from "../assets/cateringTeam.jpg";
 import beveragesImg from "../assets/beverages.webp";
 
 function Service() {
+  const navigate = useNavigate();
+
   const events = [
     {
       title: "Weddings",
       desc: "We craft unforgettable wedding experiences with premium catering, elegant décor, and impeccable service, making your special day perfect. Our wedding packages include customized menus, beautifully presented platters, skilled staff, and seamless coordination so that every moment is memorable. From intimate ceremonies to grand receptions, we ensure your celebration is luxurious, stylish, and stress-free.",
       img: weddingImg,
       reverse: false,
+      showButton: true,
     },
     {
       title: "Catering Team & Beverages",
@@ -29,7 +34,10 @@ function Service() {
   ];
 
   return (
-    <div id="services" className="bg-gray-100 overflow-hidden py-20 px-6 md:px-16 text-red-600">
+    <div
+      id="services"
+      className="bg-gray-100 overflow-hidden py-20 px-6 md:px-16 text-red-600"
+    >
       <motion.h2
         className="kaushan-script-regular text-4xl md:text-5xl text-center mb-16"
         initial={{ opacity: 0, y: -30 }}
@@ -50,21 +58,36 @@ function Service() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: index * 0.3 }}
           >
-            {/* Image */}
+            {/* Image Section */}
             <div className="w-full lg:w-1/2">
               <img
                 src={event.img}
                 alt={event.title}
-                className="w-full h-96 object-cover rounded-2xl shadow-lg"
+                className="w-full h-96 object-cover rounded-2xl shadow-xl hover:scale-105 transition-transform duration-500"
               />
             </div>
 
-            {/* Text */}
+            {/* Text Section */}
             <div className="w-full lg:w-1/2 flex flex-col justify-center">
-              <h3 className="text-3xl md:text-4xl font-semibold mb-6">
+              <h3 className="text-3xl md:text-4xl font-semibold mb-6 text-gray-800">
                 {event.title}
               </h3>
-              <p className="text-lg md:text-xl leading-relaxed">{event.desc}</p>
+              <p className="text-lg md:text-xl leading-relaxed mb-6 text-gray-700">
+                {event.desc}
+              </p>
+
+              {/* Explore Weddings Button */}
+              {event.showButton && (
+           <motion.button
+  whileHover={{ scale: 1.05, x: 4 }}
+  whileTap={{ scale: 0.95 }}
+  onClick={() => navigate("/weddings")}
+  className="flex items-center gap-2 bg-red-500 text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-md hover:bg-red-600 transition-all duration-300 w-fit"
+>
+  Explore <FaArrowRight className="text-xs mt-[1px]" />
+</motion.button>
+
+              )}
             </div>
           </motion.div>
         ))}

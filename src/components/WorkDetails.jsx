@@ -15,8 +15,6 @@ function WorkDetails({ work, onClose }) {
   const [editableWork, setEditableWork] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-
-  // Add Staff popup state
   const [isAddStaffOpen, setIsAddStaffOpen] = useState(false);
   const [selectedStaffIds, setSelectedStaffIds] = useState(new Set());
 
@@ -41,12 +39,15 @@ function WorkDetails({ work, onClose }) {
 
   const isAdmin = user?.role === "admin" || user?.role === "superadmin";
 
-  // Filter staff not already assigned
+  // Filter available staff (not already assigned)
   const availableStaff = allUsers.filter(
     (u) => u.role === "staff" && !staffData.some((s) => s.user?._id === u._id)
   );
 
-  // Calculate overall payment status
+  const assignedStaffCount = staffData.length;
+  const maxAllowed = editableWork.totalMembers || currentWork.totalMembers || 0;
+  const maxReached = assignedStaffCount >= maxAllowed;
+
   const calcOverallPaymentStatus = (updatedStaff) =>
     updatedStaff.every((s) => s.paymentStatus === "completed") ? "completed" : "pending";
 
@@ -144,13 +145,13 @@ function WorkDetails({ work, onClose }) {
         <FaTimes />
       </button>
 
-      {/* Staff List */}
+      {/* Staff Panel */}
       <div className="w-full md:w-1/3 flex flex-col gap-3 bg-white rounded-md p-5 h-[70vh] md:overflow-y-auto shadow-sm">
         <div className="flex justify-between items-center mb-3 border-b pb-2">
           <h2 className="text-xl font-bold text-gray-700">
             Staff ({staffData.length})
           </h2>
-          {isAdmin && availableStaff.length > 0 && (
+          {isAdmin && availableStaff.length > 0 && !maxReached && (
             <button
               onClick={() => setIsAddStaffOpen(true)}
               className="flex items-center gap-1 text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
@@ -217,7 +218,7 @@ function WorkDetails({ work, onClose }) {
           <p className="text-gray-500 text-center mt-4">No staff assigned yet.</p>
         )}
 
-        {/* Add Staff Popup */}
+        {/* Add Staff Modal */}
         {isAddStaffOpen && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
             <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
@@ -352,17 +353,20 @@ function WorkDetails({ work, onClose }) {
                 <option value="completed">Completed</option>
               </select>
             ) : (
-              <span
-                className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                  currentWork.status === "completed"
-                    ? "bg-green-100 text-green-700"
-                    : currentWork.status === "in-progress"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {currentWork.status.charAt(0).toUpperCase() + currentWork.status.slice(1)}
-              </span>
+             <span
+  className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+    currentWork.status === "completed"
+      ? "bg-green-100 text-green-700"
+      : currentWork.status === "in-progress"
+      ? "bg-yellow-100 text-yellow-700"
+      : currentWork.status === "due"
+      ? "bg-red-100 text-red-700"
+      : "bg-gray-100 text-gray-700"
+  }`}
+>
+  {currentWork.status.charAt(0).toUpperCase() + currentWork.status.slice(1)}
+</span>
+
             )}
           </div>
 

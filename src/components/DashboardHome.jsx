@@ -107,7 +107,7 @@ function DashboardHome() {
           <div className="hidden sm:flex bg-gray-100 font-semibold text-gray-700 px-4 py-2">
             <div className="w-1/4">Title</div>
             <div className="w-1/4">Status</div>
-            <div className="w-1/4">Assigned To</div>
+            <div className="w-1/4">Members required </div>
             <div className="w-1/4">Due Date</div>
           </div>
 
@@ -137,30 +137,27 @@ function DashboardHome() {
                   </span>
                 </div>
 
-                {/* Status for large screens */}
-                <div className="hidden sm:block sm:w-1/4 mt-1 sm:mt-0">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      work.status.toLowerCase() === "done" ||
-                      work.status.toLowerCase() === "completed"
-                        ? "bg-green-100 text-green-700"
-                        : work.status.toLowerCase() === "in-progress"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {work.status}
-                  </span>
-                </div>
+            {/* Status for large screens */}
+<div className="hidden sm:block sm:w-1/4 mt-1 sm:mt-0">
+  <span
+    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+      work.status.toLowerCase() === "done" || work.status.toLowerCase() === "completed"
+        ? "bg-green-100 text-green-700"
+        : work.status.toLowerCase() === "in-progress"
+        ? "bg-blue-100 text-blue-700"
+        : work.status.toLowerCase() === "due"
+        ? "bg-red-100 text-red-700"
+        : "bg-yellow-100 text-yellow-700"
+    }`}
+  >
+    {work.status}
+  </span>
+</div>
 
-               {/* Assigned To (hide on small screens) */}
+
 <div className="w-full sm:w-1/4 mt-1 sm:mt-0 text-gray-600  hidden sm:block">
   <div className="overflow-x-auto whitespace-nowrap">
-    {work.assignedTo && work.assignedTo.length > 0
-      ? work.assignedTo
-          .map((a) => a.user?.name || a.name || "Unnamed")
-          .join(", ")
-      : "Not assigned"}
+   {work.totalMembers}
   </div>
 </div>
 

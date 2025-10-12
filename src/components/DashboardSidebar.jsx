@@ -2,17 +2,17 @@ import React, { useContext } from "react";
 import {
   FaTimes,
   FaUserTie,
-  FaCalendarAlt,
+  
   FaTasks,
   FaCog,
   FaSignOutAlt,
   FaUsers,
 } from "react-icons/fa";
 import UserContext from "../context/UserContext";
-
+import { useNavigate } from "react-router-dom";
 function DashboardSidebar({ active, setActive, sidebarOpen, setSidebarOpen }) {
   const { user, logoutUser } = useContext(UserContext);
-
+const navigate  = useNavigate()
   // Base menu for all staff
   let menuItems = [
     { label: "Dashboard", icon: <FaUserTie /> },
@@ -47,7 +47,7 @@ function DashboardSidebar({ active, setActive, sidebarOpen, setSidebarOpen }) {
     >
       {/* Header */}
       <div className="flex justify-between items-center md:block border-b border-white">
-        <h1 className="text-3xl font-bold mb-2 kaushan-script-regular">Canopus</h1>
+        <h1 onClick={() => navigate("/")} className="text-3xl font-bold mb-2 kaushan-script-regular">Canopus</h1>
         <button
           className="md:hidden text-white text-2xl"
           onClick={() => setSidebarOpen(false)}

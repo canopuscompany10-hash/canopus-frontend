@@ -65,6 +65,14 @@ function Login() {
       {/* Right Form Section */}
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-md p-8 md:p-10">
+          {/* Go Back Button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="mb-4 text-sm text-red-600 hover:underline"
+          >
+            &larr; Go Back
+          </button>
+
           <h2 className="text-3xl font-bold text-red-600 mb-6 text-center">
             Login
           </h2>

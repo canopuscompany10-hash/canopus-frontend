@@ -3,15 +3,16 @@ import { motion } from "framer-motion";
 import { FaEdit, FaTrash, FaSearch, FaUserShield, FaPlus, FaUsers } from "react-icons/fa";
 import UserContext from "../context/UserContext";
 import CreateUser from "./CreateUser";
+import toast from "react-hot-toast";
 
 function UserManagement() {
-  const { allUsers, deleteUser, user: currentUser } = useContext(UserContext);
+  const { allUsers, deleteUser, updateUser, user: currentUser } = useContext(UserContext);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [editUser, setEditUser] = useState(null);
   const [newRole, setNewRole] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // Filter out superadmins from the table
   const visibleUsers = allUsers.filter(u => u.role !== "superadmin");
 
   const filteredUsers = visibleUsers.filter(
@@ -22,38 +23,44 @@ function UserManagement() {
   );
 
   const totalUsers = visibleUsers.length;
-  const totalAdmins = visibleUsers.filter((u) => u.role.toLowerCase() === "admin").length;
-  const totalManagers = visibleUsers.filter((u) => u.role.toLowerCase() === "manager").length;
-  const totalStaff = visibleUsers.filter((u) => u.role.toLowerCase() === "staff").length;
-
-  const handleRoleChange = (id, role) => {
-    const userIndex = allUsers.findIndex((u) => u._id === id);
-    if (userIndex !== -1) allUsers[userIndex].role = role;
-    setEditUser(null);
-    setNewRole("");
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to remove this user?")) {
-      try {
-        await deleteUser(id);
-        alert("User deleted successfully!");
-      } catch (err) {
-        console.error(err);
-        alert("Failed to delete user.");
-      }
-    }
-  };
+  const totalAdmins = visibleUsers.filter(u => u.role === "admin").length;
+  const totalManagers = visibleUsers.filter(u => u.role === "manager").length;
+  const totalStaff = visibleUsers.filter(u => u.role === "staff").length;
 
   const getRoleOptions = (u) => {
     if (currentUser.role === "superadmin") return ["admin", "manager", "staff"];
-    return ["staff"]; // normal admin can only assign Staff
+    if (currentUser.role === "admin") return ["staff"];
+    return [];
   };
 
   const canEditOrDelete = (u) => {
     if (currentUser.role === "superadmin") return u.role !== "superadmin";
     if (currentUser.role === "admin") return u.role === "staff";
     return false;
+  };
+
+  const handleRoleChange = async (id, role) => {
+    if (!role) return toast.error("Please select a role.");
+    try {
+      await updateUser({ id, role });
+      toast.success("Role updated successfully!");
+      setEditUser(null);
+      setNewRole("");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update role.");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to remove this user?")) return;
+    try {
+      await deleteUser(id);
+      toast.success("User deleted successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete user.");
+    }
   };
 
   return (
@@ -104,11 +111,12 @@ function UserManagement() {
       </div>
 
       {/* User Table Panel */}
-      <div className="flex flex-col border h-[50vh] border-gray-200 rounded-lg overflow-y-scroll">
+      <div className="flex flex-col border h-[45vh] border-gray-200 rounded-lg overflow-y-scroll">
         <div className="hidden md:flex bg-gray-100 text-gray-700 font-semibold py-3 px-4">
-          <div className="w-1/3">User</div>
-          <div className="w-1/3">Role</div>
-          <div className="w-1/3 text-right">Actions</div>
+          <div className="w-1/4">User</div>
+          <div className="w-1/4">Role</div>
+          <div className="w-1/4">Total Work Completed</div>
+          <div className="w-1/4 text-right">Actions</div>
         </div>
 
         {filteredUsers.length > 0 ? (
@@ -121,13 +129,9 @@ function UserManagement() {
               className={`flex flex-col md:flex-row md:items-center md:justify-between px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-all ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
             >
               {/* User Info */}
-              <div className="flex items-center gap-3 w-full md:w-1/3">
+              <div className="flex items-center gap-3 w-full md:w-1/4">
                 {u.profilePic ? (
-                  <img
-                    src={u.profilePic}
-                    alt={u.name}
-                    className="w-10 h-10 rounded-full border object-cover"
-                  />
+                  <img src={u.profilePic} alt={u.name} className="w-10 h-10 rounded-full border object-cover" />
                 ) : (
                   <div className="w-10 h-10 rounded-full border bg-red-600 flex items-center justify-center text-white font-semibold">
                     {u.name?.[0]?.toUpperCase() || "U"}
@@ -140,7 +144,7 @@ function UserManagement() {
               </div>
 
               {/* Role */}
-              <div className="mt-2 md:mt-0 w-full md:w-1/3">
+              <div className="mt-2 md:mt-0 w-full md:w-1/4">
                 {editUser === u._id ? (
                   <select
                     value={newRole}
@@ -161,8 +165,13 @@ function UserManagement() {
                 )}
               </div>
 
+              {/* Total Work Completed */}
+              <div className="mt-2 md:mt-0 w-full md:w-1/4">
+                <span className="text-gray-700 font-medium">{u.totalWorkCompleted || 0}</span>
+              </div>
+
               {/* Actions */}
-              <div className="flex gap-2 mt-2 md:mt-0 w-full md:w-1/3 justify-end">
+              <div className="flex gap-2 mt-2 md:mt-0 w-full md:w-1/4 justify-end">
                 {canEditOrDelete(u) && editUser === u._id ? (
                   <button
                     onClick={() => handleRoleChange(u._id, newRole)}

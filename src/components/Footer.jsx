@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import { FaFacebookF, FaTwitter, FaWhatsapp, FaLinkedinIn, FaInstagram } from "react-icons/fa";
 
 function Footer() {
   const navigate = useNavigate();
@@ -20,21 +20,25 @@ function Footer() {
 
   const whatsappNumber = "9744850680"; 
 
+  const socialLinks = [
+     { icon: FaWhatsapp, url: `https://wa.me/${whatsappNumber}` },
+    { icon: FaInstagram, url: "https://www.instagram.com/canopus.company/" },
+    { icon: FaFacebookF, url: "#" },
+    { icon: FaTwitter, url: "#" },
+   
+  ];
+
   const handleClick = (link) => {
     if (link.path === "whatsapp") {
-      // Open WhatsApp
       window.open(
         `https://wa.me/${whatsappNumber}`,
         "_blank",
         "noopener,noreferrer"
       );
     } else if (link.path.startsWith("/")) {
-      // SPA navigation
       navigate(link.path);
-      // Optional: smooth scroll to top
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-      // Fallback scroll for IDs like #menu or #about
       const el = document.getElementById(link.path.replace("/", ""));
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -92,17 +96,17 @@ function Footer() {
 
         {/* Social Icons */}
         <div className="flex gap-4 mt-6 md:mt-0 justify-center">
-          {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn].map(
-            (Icon, index) => (
-              <a
-                key={index}
-                href="#"
-                className="p-3 bg-white text-red-600 rounded-full hover:bg-yellow-400 hover:text-white transition-all transform hover:scale-110"
-              >
-                <Icon />
-              </a>
-            )
-          )}
+          {socialLinks.map((social, index) => (
+            <a
+              key={index}
+              href={social.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 bg-white text-red-600 rounded-full hover:bg-yellow-400 hover:text-white transition-all transform hover:scale-110"
+            >
+              <social.icon />
+            </a>
+          ))}
         </div>
       </div>
 

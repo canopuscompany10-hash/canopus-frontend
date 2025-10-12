@@ -13,7 +13,10 @@ function WorkManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedWork, setSelectedWork] = useState(null);
 
-  // ✅ Pass string directly, not object
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   const handleStatusChange = async (workId, newStatus) => {
     await updateWorkStatus(workId, newStatus);
   };
@@ -26,6 +29,29 @@ function WorkManagement() {
         work.description.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredWorks.length / itemsPerPage);
+  const paginatedWorks = filteredWorks.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Function to get status badge color classes
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "completed":
+        return "bg-green-500";
+      case "in progress":
+        return "bg-yellow-500";
+      case "pending":
+        return "bg-gray-500";
+      case "due":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
 
   if (loading)
     return <p className="text-center text-gray-500 mt-10">Loading works...</p>;
@@ -47,7 +73,10 @@ function WorkManagement() {
           type="text"
           placeholder="Search Work..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
           className="w-full sm:w-64 px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
         />
         {(user?.role === "admin" || user?.role === "superadmin") && (
@@ -63,19 +92,16 @@ function WorkManagement() {
       {/* Work Cards */}
       {!selectedWork && (
         <>
-          {filteredWorks.length === 0 ? (
+          {paginatedWorks.length === 0 ? (
             <p className="text-center text-gray-500 mt-10">No work available</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredWorks.map((work) => {
+              {paginatedWorks.map((work) => {
                 const isAssignedToMe = work.assignedTo?.some(
                   (a) => a.user?._id === user?._id
                 );
 
-                let statusColor = "bg-gray-500";
-                if (work.status === "completed") statusColor = "bg-green-500";
-                else if (work.status === "in progress")
-                  statusColor = "bg-yellow-500";
+                const statusColor = getStatusColor(work.status);
 
                 return (
                   <div
@@ -107,6 +133,7 @@ function WorkManagement() {
                           <option value="pending">Pending</option>
                           <option value="in progress">In Progress</option>
                           <option value="completed">Completed</option>
+                          <option value="due">Due</option>
                         </select>
                       ) : (
                         <span
@@ -121,8 +148,7 @@ function WorkManagement() {
                     <div className="flex flex-col text-gray-500 font-medium justify-between text-xs space-y-2 pt-3">
                       <span className="flex items-center gap-2">
                         <FaUsers />
-                        <strong>Total Members Required:</strong>{" "}
-                        {work.totalMembers || 0}
+                        <strong>Total Members Required:</strong> {work.totalMembers || 0}
                       </span>
 
                       <span className="flex items-center gap-2">
@@ -143,6 +169,39 @@ function WorkManagement() {
               })}
             </div>
           )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center gap-2 mt-6">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === i + 1
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 hover:bg-gray-300"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </>
       )}
 
@@ -153,10 +212,7 @@ function WorkManagement() {
 
       {/* Add Work Modal */}
       {(user?.role === "admin" || user?.role === "superadmin") && (
-        <AddWork
-          isOpen={isModalOpen}
-          closeModal={() => setIsModalOpen(false)}
-        />
+        <AddWork isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} />
       )}
     </div>
   );

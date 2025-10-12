@@ -1,5 +1,5 @@
 import React, { useRef, useContext, useState } from "react";
-import { FaTimes, FaCalendarAlt, FaClock, FaUsers, FaMoneyBill } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 import WorkContext from "../context/WorkContext";
 import UserContext from "../context/UserContext";
 import toast from "react-hot-toast";
@@ -53,7 +53,6 @@ function AddWork({ isOpen, closeModal }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Capitalize first letter
     const title = capitalizeFirstLetter(titleRef.current.value.trim());
     const description = capitalizeFirstLetter(descriptionRef.current.value.trim());
     const dueDate = dueDateRef.current.value;
@@ -63,15 +62,16 @@ function AddWork({ isOpen, closeModal }) {
     const budget = parseFloat(budgetRef.current.value);
     const selectedStaff = Array.from(selectedStaffRef.current);
 
-    // Validation
     if (!title || !dueDate || !totalMembers || totalMembers <= 0 || budget <= 0) {
       toast.error("Please fill all required fields correctly.");
       return;
     }
+
     if (selectedStaff.length === 0) {
       toast.error("Please assign at least one staff member.");
       return;
     }
+
     if (startTime && endTime && startTime >= endTime) {
       toast.error("End time must be after start time.");
       return;
@@ -91,7 +91,7 @@ function AddWork({ isOpen, closeModal }) {
     };
 
     try {
-      await addWork(newWork); // Await for async action if addWork returns a promise
+      await addWork(newWork);
       toast.success("Work added successfully!");
       closeModal();
       resetForm();
@@ -106,135 +106,121 @@ function AddWork({ isOpen, closeModal }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center bg-black/50 z-50 px-4">
-      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto relative">
+    <div className="fixed inset-0 flex justify-center items-center bg-black/40 z-50 px-4">
+      <div className="bg-white rounded-xl shadow-xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto relative">
+        
+        <button
+          onClick={() => {
+            closeModal();
+            resetForm();
+          }}
+          className="absolute top-4 right-4 text-gray-500 hover:text-red-600 transition"
+          aria-label="Close modal"
+        >
+          <FaTimes size={24} />
+        </button>
+
         {/* Header */}
-        <div className="flex justify-between items-center mb-6 border-b pb-2">
-          <h3 className="text-xl font-bold text-gray-800">Add New Work</h3>
-          <button
-            onClick={() => {
-              closeModal();
-              resetForm();
-            }}
-            className="text-gray-600 hover:text-red-600 transition"
-            aria-label="Close modal"
-          >
-            <FaTimes size={22} />
-          </button>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-semibold text-gray-800 border-b-2 border-red-600 pb-1">
+            Create Works
+          </h2>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Title */}
-          <div className="flex flex-col">
-            <label className="font-semibold text-gray-700 mb-1">Title *</label>
+          <div>
+            <label className="text-xs uppercase text-gray-500 mb-1 block">Title *</label>
             <input
               type="text"
               ref={titleRef}
               placeholder="Enter work title"
-              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-400 outline-none"
+              className="w-full border-b border-gray-300 focus:border-red-600 outline-none py-2 text-sm placeholder-gray-400"
               required
             />
           </div>
 
           {/* Description */}
-          <div className="flex flex-col">
-            <label className="font-semibold text-gray-700 mb-1">Description</label>
+          <div>
+            <label className="text-xs uppercase text-gray-500 mb-1 block">Description</label>
             <textarea
               ref={descriptionRef}
-              placeholder="Enter work description"
+              placeholder="Enter description"
               rows={3}
-              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-400 outline-none resize-none"
+              className="w-full border-b border-gray-300 focus:border-red-600 outline-none py-2 text-sm placeholder-gray-400 resize-none"
             />
           </div>
 
           {/* Due Date */}
-          <div className="flex flex-col relative">
-            <label className="font-semibold text-gray-700 mb-1">Due Date *</label>
-            <div className="flex items-center gap-2">
-              <FaCalendarAlt className="text-gray-400" />
-              <input
-                type="date"
-                ref={dueDateRef}
-                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-400 outline-none"
-                required
-              />
-            </div>
+          <div>
+            <label className="text-xs uppercase text-gray-500 mb-1 block">Due Date *</label>
+            <input
+              type="date"
+              ref={dueDateRef}
+              className="w-full border-b border-gray-300 focus:border-red-600 outline-none py-2 text-sm"
+              required
+            />
           </div>
 
           {/* Start & End Time */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col relative">
-              <label className="font-semibold text-gray-700 mb-1">Start Time</label>
-              <div className="flex items-center gap-2">
-                <FaClock className="text-gray-400" />
-                <input
-                  type="time"
-                  ref={startTimeRef}
-                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-400 outline-none"
-                />
-              </div>
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              <label className="text-xs uppercase text-gray-500 mb-1 block">Start Time</label>
+              <input
+                type="time"
+                ref={startTimeRef}
+                className="w-full border-b border-gray-300 focus:border-red-600 outline-none py-2 text-sm"
+              />
             </div>
-            <div className="flex flex-col relative">
-              <label className="font-semibold text-gray-700 mb-1">End Time</label>
-              <div className="flex items-center gap-2">
-                <FaClock className="text-gray-400" />
-                <input
-                  type="time"
-                  ref={endTimeRef}
-                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-400 outline-none"
-                />
-              </div>
+            <div className="w-1/2">
+              <label className="text-xs uppercase text-gray-500 mb-1 block">End Time</label>
+              <input
+                type="time"
+                ref={endTimeRef}
+                className="w-full border-b border-gray-300 focus:border-red-600 outline-none py-2 text-sm"
+              />
             </div>
           </div>
 
           {/* Total Members */}
-          <div className="flex flex-col relative">
-            <label className="font-semibold text-gray-700 mb-1">Total Members *</label>
-            <div className="flex items-center gap-2">
-              <FaUsers className="text-gray-400" />
-              <input
-                type="number"
-                min={1}
-                ref={totalMembersRef}
-                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-400 outline-none"
-                required
-              />
-            </div>
+          <div>
+            <label className="text-xs uppercase text-gray-500 mb-1 block">Total Members *</label>
+            <input
+              type="number"
+              min={1}
+              ref={totalMembersRef}
+              className="w-full border-b border-gray-300 focus:border-red-600 outline-none py-2 text-sm"
+              required
+            />
           </div>
 
           {/* Budget */}
-          <div className="flex flex-col relative">
-            <label className="font-semibold text-gray-700 mb-1">Budget *</label>
-            <div className="flex items-center gap-2">
-              <FaMoneyBill className="text-gray-400" />
-              <input
-                type="number"
-                min={0}
-                ref={budgetRef}
-                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-400 outline-none"
-                required
-              />
-            </div>
+          <div>
+            <label className="text-xs uppercase text-gray-500 mb-1 block">Budget *</label>
+            <input
+              type="number"
+              min={0}
+              ref={budgetRef}
+              className="w-full border-b border-gray-300 focus:border-red-600 outline-none py-2 text-sm"
+              required
+            />
           </div>
 
           {/* Staff Assignment */}
-          <div className="flex flex-col">
-            <label className="font-semibold text-gray-700 mb-2">Assign Staff *</label>
+          <div>
+            <label className="text-xs uppercase text-gray-500 mb-2 block">Assign Staff *</label>
             {staffList.length === 0 ? (
               <p className="text-sm text-gray-500 italic">No staff available.</p>
             ) : (
               <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border border-gray-200 rounded p-2">
                 {staffList.map((staff) => (
-                  <label
-                    key={staff._id}
-                    className="flex items-center gap-2 text-sm cursor-pointer select-none"
-                  >
+                  <label key={staff._id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                     <input
                       type="checkbox"
                       value={staff._id}
                       onChange={handleCheckboxChange}
-                      className="cursor-pointer"
+                      className="accent-red-600"
                     />
                     {staff.name}
                   </label>
@@ -243,12 +229,12 @@ function AddWork({ isOpen, closeModal }) {
             )}
           </div>
 
-          {/* Submit */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
             className={`w-full py-3 rounded-lg text-white font-semibold ${
-              loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+              loading ? "bg-red-300 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
             } transition flex justify-center items-center gap-2`}
           >
             {loading ? (
@@ -257,7 +243,7 @@ function AddWork({ isOpen, closeModal }) {
                 Adding...
               </>
             ) : (
-              "Add Work"
+              "SIGN UP"
             )}
           </button>
         </form>

@@ -24,7 +24,7 @@ export const WorkProvider = ({ children }) => {
     }
   };
 
-  // Normalize assigned users
+  // Normalize assigned users (to expected format)
   const normalizeAssignedTo = (assignedTo) => {
     if (!assignedTo) return [];
     if (!Array.isArray(assignedTo)) assignedTo = [assignedTo];
@@ -35,7 +35,12 @@ export const WorkProvider = ({ children }) => {
           : item?.value || item?.user?._id || item?._id
       )
       .filter(Boolean)
-      .map((id) => ({ user: id, amountPaid: 0, paymentStatus: "pending", violations: [] }));
+      .map((id) => ({
+        user: id,
+        amountPaid: 0,
+        paymentStatus: "pending",
+        violations: [],
+      }));
   };
 
   // Add new work
@@ -43,7 +48,8 @@ export const WorkProvider = ({ children }) => {
     try {
       workData.assignedTo = normalizeAssignedTo(workData.assignedTo);
       if (workData.budget) workData.budget = parseFloat(workData.budget);
-      if (!workData.totalMembers) workData.totalMembers = workData.assignedTo.length;
+      if (!workData.totalMembers)
+        workData.totalMembers = workData.assignedTo.length;
       workData.overallPaymentStatus = "pending";
 
       const res = await AxiosInstance.post("/work", workData);
@@ -57,7 +63,7 @@ export const WorkProvider = ({ children }) => {
     }
   };
 
-  // Update work
+  // Update existing work
   const updateWork = async (workId, updatedData) => {
     try {
       if (updatedData.assignedTo)
@@ -80,7 +86,7 @@ export const WorkProvider = ({ children }) => {
     }
   };
 
-  // Delete work
+  // Delete work by ID
   const deleteWork = async (workId) => {
     try {
       await AxiosInstance.delete(`/work/${workId}`);
@@ -94,7 +100,7 @@ export const WorkProvider = ({ children }) => {
     }
   };
 
-  // Update staff payment & recalc overall payment status
+  // Update staff payment and recalc overall payment status
   const updateStaffPayment = async (workId, staffId, data) => {
     try {
       if (data.amountPaid !== undefined) data.amountPaid = parseFloat(data.amountPaid);
@@ -116,25 +122,21 @@ export const WorkProvider = ({ children }) => {
     }
   };
 
-  
-const updateWorkStatus = async (workId, status) => {
-  try {
-    // ✅ status should be a string
-    const res = await AxiosInstance.patch(`/work/${workId}/status`, { status });
+  // Update work status
+  const updateWorkStatus = async (workId, status) => {
+    try {
+      const res = await AxiosInstance.patch(`/work/${workId}/status`, { status });
 
-    // Update local state
-    setWorks(prev =>
-      prev.map((w) => (w._id === workId ? res.data.work : w))
-    );
+      setWorks((prev) =>
+        prev.map((w) => (w._id === workId ? res.data.work : w))
+      );
 
-    toast.success("Work status updated!");
-  } catch (err) {
-    console.error("Update Work Status Error:", err);
-    toast.error("Failed to update work status");
-  }
-};
-
-
+      toast.success("Work status updated!");
+    } catch (err) {
+      console.error("Update Work Status Error:", err);
+      toast.error("Failed to update work status");
+    }
+  };
 
   useEffect(() => {
     fetchWorks();
@@ -151,7 +153,7 @@ const updateWorkStatus = async (workId, status) => {
         updateWork,
         deleteWork,
         updateStaffPayment,
-        updateWorkStatus, //  provide this function
+        updateWorkStatus,
         setMessage,
       }}
     >

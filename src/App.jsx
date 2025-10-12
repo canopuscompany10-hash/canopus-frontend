@@ -4,6 +4,7 @@ import { UserProvider } from "./context/UserContext";
 import { WorkProvider } from "./context/WorkContext";
 import { MenuProvider } from "./context/MenuContext";
 import { GalleryProvider } from "./context/GalleryContext";
+import { WeddingProvider } from "./context/WeddingContext";
 
 import AppWrapper from "./AppWrapper";
 import Header from "./components/Header";
@@ -22,7 +23,6 @@ function SEOHandler() {
       title = "Home | Catering Canopus";
       description =
         "Welcome to Catering Canopus — manage your catering services with ease.";
-    
     } else if (location.pathname.includes("/dashboard")) {
       title = "Dashboard | Catering Canopus";
       description =
@@ -33,14 +33,7 @@ function SEOHandler() {
         "Login to your Catering Canopus account to manage your operations.";
     }
 
-// else if (location.pathname.includes("/offerings")) {
-//       title = "Offerings | Catering Canopus";
-//       description =
-//         "Explore our diverse catering offerings and packages for every occasion.";
-
-
     document.title = title;
-
     let descTag = document.querySelector('meta[name="description"]');
     if (!descTag) {
       descTag = document.createElement("meta");
@@ -57,13 +50,11 @@ function AppContent() {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
 
-  // Demo loader: hide after 1.5s
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
-  // Hide header on login and dashboard
   const noHeaderRoutes = ["/login", "/dashboard"];
   const hideHeader = noHeaderRoutes.some((route) =>
     location.pathname.includes(route)
@@ -87,7 +78,9 @@ function App() {
         <WorkProvider>
           <MenuProvider>
             <GalleryProvider>
-              <AppContent />
+              <WeddingProvider>
+                <AppContent />
+              </WeddingProvider>
             </GalleryProvider>
           </MenuProvider>
         </WorkProvider>

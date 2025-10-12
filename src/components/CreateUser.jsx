@@ -13,8 +13,17 @@ function CreateUser({ onClose }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    let updatedValue = value;
+
+    // Capitalize first letter for name
+    if (name === "name") {
+      updatedValue = value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    setFormData({ ...formData, [name]: updatedValue });
+  };
 
   const validateForm = () => {
     if (!formData.name.trim()) return "Name is required.";
@@ -44,7 +53,6 @@ function CreateUser({ onClose }) {
       setSuccess("User created successfully!");
       setFormData({ name: "", email: "", password: "", role: "staff" });
 
-      // Auto-close after 2 seconds
       setTimeout(() => onClose(), 2000);
     } catch (err) {
       console.error(err);
@@ -55,31 +63,31 @@ function CreateUser({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-        <h2 className="text-xl font-semibold mb-4 text-center">Create New User</h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50">
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-8">
+        <h2 className="text-2xl font-semibold text-center mb-6">Create User</h2>
 
-        {error && <p className="text-red-500 mb-2 text-center">{error}</p>}
-        {success && <p className="text-green-500 mb-2 text-center">{success}</p>}
+        {error && <p className="text-red-600 text-center mb-3">{error}</p>}
+        {success && <p className="text-green-600 text-center mb-3">{success}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
             name="name"
-            placeholder="Name"
+            placeholder="First Name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
             required
           />
 
           <input
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="Email Id"
             value={formData.email}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
             required
           />
 
@@ -89,7 +97,7 @@ function CreateUser({ onClose }) {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
             required
           />
 
@@ -97,29 +105,28 @@ function CreateUser({ onClose }) {
             name="role"
             value={formData.role}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
             required
           >
             <option value="staff">Staff</option>
             <option value="admin">Admin</option>
           </select>
 
-          <div className="flex justify-end gap-2 mt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-            >
-              {loading ? "Creating..." : "Create"}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 mt-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
+          >
+            {loading ? "Creating..." : "Create"}
+          </button>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full py-3 mt-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition"
+          >
+            Cancel
+          </button>
         </form>
       </div>
     </div>

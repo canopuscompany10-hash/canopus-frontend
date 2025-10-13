@@ -13,8 +13,10 @@ function UserManagement() {
   const [newRole, setNewRole] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const visibleUsers = allUsers.filter(u => u.role !== "superadmin");
+  // Hide superadmin from list
+  const visibleUsers = allUsers.filter((u) => u.role !== "superadmin");
 
+  // Search filtering
   const filteredUsers = visibleUsers.filter(
     (u) =>
       u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -22,20 +24,28 @@ function UserManagement() {
       u.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Counts
   const totalUsers = visibleUsers.length;
-  const totalAdmins = visibleUsers.filter(u => u.role === "admin").length;
-  const totalManagers = visibleUsers.filter(u => u.role === "manager").length;
-  const totalStaff = visibleUsers.filter(u => u.role === "staff").length;
+  const totalAdmins = visibleUsers.filter((u) => u.role === "admin").length;
+  const totalManagers = visibleUsers.filter((u) => u.role === "manager").length;
+  const totalStaff = visibleUsers.filter((u) => u.role === "staff").length;
 
-  const getRoleOptions = (u) => {
+  // ✅ Roles current user can assign
+  const getRoleOptions = () => {
     if (currentUser.role === "superadmin") return ["admin", "manager", "staff"];
-    if (currentUser.role === "admin") return ["staff"];
+    if (currentUser.role === "admin") return ["admin", "staff"];
     return [];
   };
 
-  const canEditOrDelete = (u) => {
-    if (currentUser.role === "superadmin") return u.role !== "superadmin";
-    if (currentUser.role === "admin") return u.role === "staff";
+  // ✅ Permission logic for edit/delete
+  const canEditOrDelete = (target) => {
+    const me = currentUser;
+
+    if (me.role === "superadmin") return target.role !== "superadmin";
+    if (me.role === "admin") {
+      // admin can manage staff only (not another admin)
+      return target.role === "staff";
+    }
     return false;
   };
 
@@ -75,9 +85,12 @@ function UserManagement() {
           { title: "Total Users", count: totalUsers, icon: <FaUsers className="text-3xl text-blue-500" />, bg: "bg-blue-100 text-blue-800" },
           { title: "Admins", count: totalAdmins, icon: <FaUserShield className="text-3xl text-red-500" />, bg: "bg-red-100 text-red-800" },
           { title: "Managers", count: totalManagers, icon: <FaUserShield className="text-3xl text-yellow-500" />, bg: "bg-yellow-100 text-yellow-800" },
-          { title: "Staff", count: totalStaff, icon: <FaUserShield className="text-3xl text-gray-500" />, bg: "bg-gray-100 text-gray-800" }
+          { title: "Staff", count: totalStaff, icon: <FaUserShield className="text-3xl text-gray-500" />, bg: "bg-gray-100 text-gray-800" },
         ].map((card, i) => (
-          <div key={i} className={`${card.bg} rounded-xl p-4 flex flex-col items-center justify-center shadow`}>
+          <div
+            key={i}
+            className={`${card.bg} rounded-xl p-4 flex flex-col items-center justify-center shadow`}
+          >
             {card.icon}
             <span className="text-lg font-bold mt-2">{card.count}</span>
             <span className="text-sm">{card.title}</span>
@@ -85,7 +98,7 @@ function UserManagement() {
         ))}
       </div>
 
-      {/* Header + Search + Add Button */}
+      {/* Header + Search + Add */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 w-full">
         <h1 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
           <FaUserShield className="text-red-600" /> Manage Users
@@ -101,16 +114,19 @@ function UserManagement() {
               className="w-full outline-none text-gray-700 text-sm"
             />
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm md:text-base"
-          >
-            <FaPlus /> Add User
-          </button>
+
+          {(currentUser.role === "admin" || currentUser.role === "superadmin") && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm md:text-base"
+            >
+              <FaPlus /> Add User
+            </button>
+          )}
         </div>
       </div>
 
-      {/* User Table Panel */}
+      {/* User Table */}
       <div className="flex flex-col border h-[45vh] border-gray-200 rounded-lg overflow-y-scroll">
         <div className="hidden md:flex bg-gray-100 text-gray-700 font-semibold py-3 px-4">
           <div className="w-1/4">User</div>
@@ -126,7 +142,9 @@ function UserManagement() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className={`flex flex-col md:flex-row md:items-center md:justify-between px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-all ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+              className={`flex flex-col md:flex-row md:items-center md:justify-between px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-all ${
+                i % 2 === 0 ? "bg-white" : "bg-gray-50"
+              }`}
             >
               {/* User Info */}
               <div className="flex items-center gap-3 w-full md:w-1/4">
@@ -152,16 +170,24 @@ function UserManagement() {
                     className="border rounded-lg p-1 text-sm w-full md:w-auto"
                   >
                     <option value="">Select role</option>
-                    {getRoleOptions(u).map((r) => (
-                      <option key={r} value={r}>{r}</option>
+                    {getRoleOptions().map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
                     ))}
                   </select>
                 ) : (
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    u.role === "admin" ? "bg-red-100 text-red-700" :
-                    u.role === "manager" ? "bg-yellow-100 text-yellow-700" :
-                    "bg-gray-100 text-gray-700"
-                  }`}>{u.role}</span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      u.role === "admin"
+                        ? "bg-red-100 text-red-700"
+                        : u.role === "manager"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {u.role}
+                  </span>
                 )}
               </div>
 
@@ -182,7 +208,10 @@ function UserManagement() {
                 ) : canEditOrDelete(u) ? (
                   <>
                     <button
-                      onClick={() => { setEditUser(u._id); setNewRole(u.role); }}
+                      onClick={() => {
+                        setEditUser(u._id);
+                        setNewRole(u.role);
+                      }}
                       className="text-blue-500 hover:text-blue-700"
                     >
                       <FaEdit />

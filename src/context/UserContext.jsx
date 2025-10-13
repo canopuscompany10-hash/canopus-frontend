@@ -69,21 +69,28 @@ export const UserProvider = ({ children }) => {
   };
 
   // Update user
-  const updateUser = async (updates) => {
-    if (!user) return;
-    try {
-      const res = await AxiosInstance.put(`/user/${user._id}`, updates);
-      const updatedUser = res.data.user;
+// Update user
+const updateUser = async (updates) => {
+  try {
+    const userId = updates.id ; // use target user ID if provided
+    const res = await AxiosInstance.put(`/user/${userId}`, updates);
+    const updatedUser = res.data.user;
+console.log(updatedUser,"updted user");
 
+    // If the updated user is the current logged-in user, update local storage too
+    if (user && user._id === userId) {
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
-      await fetchUsersWithWorkCompleted();
-      return updatedUser;
-    } catch (err) {
-      console.error("Update User Error:", err.response?.data || err);
-      throw err;
     }
-  };
+
+    await fetchUsersWithWorkCompleted();
+    return updatedUser;
+  } catch (err) {
+    console.error("Update User Error:", err.response?.data || err);
+    throw err;
+  }
+};
+
 
   // Update notification preferences
   const updateNotifications = async (prefs) => {

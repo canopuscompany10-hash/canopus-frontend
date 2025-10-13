@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import WeddingList from "./pages/WeddingList";
+import SetPassword from "./pages/SetPassword";
 
 function AppWrapper() {
   return (
@@ -13,6 +14,8 @@ function AppWrapper() {
       <Route path="/" element={<Home />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/set-password/:token" element={<SetPassword />} />
+
       <Route path="/login" element={<Login />} />
       <Route path="/weddings" element={<WeddingList />} />
 

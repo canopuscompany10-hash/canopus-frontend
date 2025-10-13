@@ -57,41 +57,40 @@ function WorkManagement() {
     return <p className="text-center text-gray-500 mt-10">Loading works...</p>;
 
   return (
-    <div className="relative flex flex-col h-[85vh] overflow-y-scroll p-4 md:overflow-hidden">
-      {/* Header */}
-      {!selectedWork && (
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-          <h2 className="font-bold text-gray-800 flex items-center gap-2">
-            Manage all your catering assignments
-          </h2>
-        </div>
-      )}
-
-      {/* Search & Add */}
-      <div className="flex items-center gap-3 w-full sm:w-auto mb-6">
-        <input
-          type="text"
-          placeholder="Search Work..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="w-full sm:w-64 px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-        />
-        {(user?.role === "admin" || user?.role === "superadmin") && (
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
-          >
-            <FaPlus /> Add
-          </button>
-        )}
-      </div>
-
-      {/* Work Cards */}
+    <div className="relative flex flex-col h-[85vh] overflow-y-scroll px-4 md:overflow-hidden">
+      {/* If no work is selected, show search, add, and cards */}
       {!selectedWork && (
         <>
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+            <h2 className="font-bold text-gray-500 flex items-center gap-2">
+              Manage all your catering assignments
+            </h2>
+          </div>
+
+          {/* Search & Add */}
+          <div className="flex items-center gap-3 w-full sm:w-auto mb-6">
+            <input
+              type="text"
+              placeholder="Search Work..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full sm:w-64 px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            />
+            {(user?.role === "admin" || user?.role === "superadmin") && (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+              >
+                <FaPlus /> Add
+              </button>
+            )}
+          </div>
+
+          {/* Work Cards */}
           {paginatedWorks.length === 0 ? (
             <p className="text-center text-gray-500 mt-10">No work available</p>
           ) : (
@@ -133,7 +132,7 @@ function WorkManagement() {
                           <option value="pending">Pending</option>
                           <option value="in progress">In Progress</option>
                           <option value="completed">Completed</option>
-                          <option value="due">Due</option>
+                          <option className="hidden" value="due">Due</option>
                         </select>
                       ) : (
                         <span

@@ -71,7 +71,7 @@ function DashboardHome() {
   ];
 
   return (
-    <div className="space-y-8 flex flex-col items-start md:w-full w-full px-4 py-6">
+    <div className="space-y-8 flex flex-col items-start md:w-full w-full px-4 ">
       {/* Welcome Text */}
       <p className="font-semibold text-gray-500 text-left w-full max-w-7xl">
         Welcome back! Here's your latest overview

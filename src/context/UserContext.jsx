@@ -40,6 +40,8 @@ export const UserProvider = ({ children }) => {
       const res = await AxiosInstance.post("/user/create", userData);
       const createdUser = res.data.user;
       setAllUsers((prev) => [...prev, createdUser]);
+      console.log(createUser, "created user");
+      
       return createdUser;
     } catch (err) {
       console.error("Create User Error:", err.response?.data || err);
@@ -134,6 +136,17 @@ export const UserProvider = ({ children }) => {
 };
 
 
+const setPassword = async (token, newPassword) => {
+  try {
+    const res = await AxiosInstance.post(`/user/set-password/${token}`, {
+      password: newPassword,
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Set Password Error:", err.response?.data || err);
+    throw err;
+  }
+};
 
   return (
     <UserContext.Provider
@@ -151,6 +164,7 @@ export const UserProvider = ({ children }) => {
         fetchUsersWithWorkCompleted,
         fetchUserWithWork,
         deleteUser,
+        setPassword
       }}
     >
       {children}

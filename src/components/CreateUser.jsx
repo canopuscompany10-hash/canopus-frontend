@@ -49,10 +49,17 @@ function CreateUser({ onClose }) {
 
     setLoading(true);
     try {
-      await createUser({ ...formData, role: formData.role.toLowerCase() });
-      setSuccess("User created successfully!");
+      // Call context function to create user
+      const createdUser = await createUser({
+        ...formData,
+        role: formData.role.toLowerCase(),
+      });
+
+      // Success feedback
+      setSuccess("User created successfully! A set password email has been sent.");
       setFormData({ name: "", email: "", password: "", role: "staff" });
 
+      // Close modal after 2 seconds
       setTimeout(() => onClose(), 2000);
     } catch (err) {
       console.error(err);
